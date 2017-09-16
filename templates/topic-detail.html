@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block css %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/editor/0.1.0/editor.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 {% endblock %}
 
 
@@ -28,15 +28,16 @@
                             <button class=" btn btn-success pull-right" type="submit" value="">收藏</button>
                         </div>
                         <div class="manage_topic">
-                            <a href="/topic/59b8cb072db872766ed747cd/edit">
-                                <i class="glyphicon glyphicon-pencil" title="编辑"></i></a>
-                            <a href="javascript:;" class="delete_topic_btn"> <i class="glyphicon glyphicon-trash"
-                                                                                title="删除"></i></a>
+                            {% if request.user.is_superuser or request.user.id == topic.author.id %}
+                                <a href="{% url 'topic:create' %}?id={{ topic.id }}">
+                                    <i class="glyphicon glyphicon-pencil" title="编辑"></i></a>
+                                <a href="javascript:;" class="delete_topic_btn" delete-data="{{ topic.id }}"> <i
+                                        class="glyphicon glyphicon-trash"
+                                        title="删除"></i></a>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="panel-body">
-                        {{ topic.content }}
-                    </div>
+                    <div class="panel-body html_content">{{ topic.content }}</div>
                 </div>
                 <div class="panel panel-default comment-list">
                     <div class="panel-heading">
@@ -160,18 +161,39 @@
 
 {% block js %}
 
-    <script src="https://cdn.jsdelivr.net/editor/0.1.0/editor.js"></script>
-    <script src="https://cdn.jsdelivr.net/editor/0.1.0/marked.js"></script>
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+
     <script>
-        var editor = new Editor({
-            element: document.getElementById('comment-editor'),
-        })
+        $(function () {
+            var simplemde = new SimpleMDE({element: $("#editor")[0]});
+            md_content = $('.html_content').html();
+            htmlText = simplemde.markdown(md_content);
+            $('.html_content').html(htmlText);
 
-        //    $('.icon-image').on('click', function () {
-        ////        alert($('.cm-string:last').html())
-        //    })
-        $('#reply_ico').on('click', function () {
 
+            $('.delete_topic_btn').on('click', function () {
+                alert('确认要删除吗？');
+                topic_id = $('.delete_topic_btn').attr('delete-data');
+                console.log(topic_id);
+                $.ajax({
+                    cache: false,
+                    type: "GET",
+                    url: "/topic/delete/" + parseInt(topic_id),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == '1') {
+                            alert(data.msg)
+                        }
+                        else if (data.status == '0') {
+                            alert(data.msg);
+                            window.location.href = "{% url 'index' %}";
+                        }
+                    },
+                });
+            })
         })
     </script>
 {% endblock %}

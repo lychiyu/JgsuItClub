@@ -10,7 +10,7 @@ from django.views.generic import View
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from users.models import UserProfile
+from users.models import UserProfile, EmailVerifyRecode
 from users.forms import RegisterForm, LoginForm
 from utils.email_send import send_email
 from topics.models import Topic, Category
@@ -93,15 +93,33 @@ class LogoutView(View):
         return HttpResponseRedirect(reverse("index"))
 
 
+class AciveUserView(View):
+    def get(self, request, code):
+        # 根据激活码获取记录
+        all_recodes = EmailVerifyRecode.objects.filter(code=code)
+        if all_recodes:
+            for recode in all_recodes:
+                email = recode.email
+                user_profile = UserProfile.objects.get(email=email)
+                user_profile.is_active = True
+                user_profile.save()
+        else:
+            return render(request, 'skip.html', {
+                'title': '激活失败',
+                'msg': '激活失败',
+            })
+        return render(request, 'login.html')
+
+
 class IndexView(View):
     def get(self, request):
         # 获取所有话题分类
         cates = Category.objects.all()
         # 获取所有话题
-        topics = Topic.objects.all()
+        topics = Topic.objects.filter(is_show=True)
 
         # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, category__in=(1, 2))[:10]
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
         return render(request, 'index.html', {

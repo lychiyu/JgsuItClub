@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block title %}
-    发布话题
+    更新话题
 {% endblock %}
 
 {% block css %}
@@ -96,11 +96,31 @@
 
     <script>
         // 初始化编辑器
-        var simplemde = new SimpleMDE({ element: $("#editor")[0] });
+        var simplemde = new SimpleMDE({element: $("#editor")[0]});
         // 自定义上传图片
         $('.fa-picture-o').on('click', function () {
             // alert($('.cm-string:last').html('https://test'))
         });
+
+        $.ajax({
+            cache: false,
+            type: "get",
+            url: "{% url 'topic:update' id %}",
+            async: true,
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            },
+            success: function (data) {
+                if (data.status == '1') {
+                    alert(data.msg)
+                }
+                else if (data.status == '0') {
+                    $('#title').val(data.title);
+                    simplemde.value(data.content);
+                }
+            },
+        });
+
         // 提交
         $('#topic_sub').on('click', function () {
             category = $('#category').val();
