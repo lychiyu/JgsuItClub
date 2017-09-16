@@ -1,0 +1,150 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}注册{% endblock %}</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/index.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/login.css' %}" rel="stylesheet"/>
+    {% block css %}{% endblock %}
+</head>
+<body>
+<nav class="navbar">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">技术交流社区</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <form id="search_form" class="navbar-form navbar-left" action="/search">
+                <div class="form-group">
+                    <input type="text" class="form-control search" placeholder="搜索">
+                </div>
+            </form>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{% url 'index' %}">首页</a></li>
+                {% if request.user.is_authenticated %}
+                    <li class="unread"><a href="#">未读消息 <span>1</span> </a></li>
+                    <li class="unread"><a href="#">设置 </a></li>
+                {% endif %}
+                <li><a href="#">关于</a></li>
+                {% if not request.user.is_authenticated %}
+                    <li><a href="{% url 'register' %}">注册</a></li>
+                    <li><a href="{% url 'login' %}">登录</a></li>
+                {% endif %}
+                {% if request.user.is_authenticated %}
+                    <li><a href="#">退出</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            {% block content %}
+                <section class="col-md-9 .col-xs-12 content">
+                    <div class="panel panel-default">
+                        {% block bread %}
+                            <div class="header">
+                                <ol class="breadcrumb">
+                                    <li><a href="/">首页</a></li>
+                                    <li class="active">注册</li>
+                                </ol>
+                            </div>
+                        {% endblock %}
+                        <div class="panel-body">
+                            <form class="form-horizontal" id="register_form">
+                                <div class="form-group">
+                                    <label for="nick_name" class="col-sm-2 control-label">昵称</label>
+                                    <div class="col-sm-5">
+                                        <input type="text" class="form-control" id="nick_name" name="nick_name"
+                                               placeholder="请输入您的昵称,这将在网站上显示">
+
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email" class="col-sm-2 control-label">邮箱</label>
+                                    <div class="col-sm-5">
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               placeholder="请输入您的邮箱">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password" class="col-sm-2 control-label">密码</label>
+                                    <div class="col-sm-5">
+                                        <input type="password" class="form-control" id="password" name="password"
+                                               placeholder="输入你的密码不少于6位">
+
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="captcha" class="col-sm-2 control-label">验证码</label>
+                                    <div class="col-sm-5">
+                                        {{ register_form.captcha }}
+
+                                    </div>
+
+                                </div>
+                                <div class="form-group" id="error">
+                                    <div class="col-sm-offset-1 col-sm-6">
+                                        <div class="alert alert-danger alert-dismissible" role="alert">
+                                            <strong id="error_msg"></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="button" class="btn btn-primary" id="register_btn">注册</button>
+                                        <a type="button" href="{% url 'login' %}" class="btn btn-success">已有账号?去登录</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            {% endblock %}
+            {% block sidebar %}
+                <section class="col-md-3 .col-xs-0 sidebar">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">关于</span>
+                        </div>
+                        <div class="inner about">
+                            <p>技术交流社区</p>
+                            <p>在这里你可以：</p>
+                            <ul>
+                                <li>向别人提出你遇到的问题</li>
+                                <li>帮助遇到问题的人</li>
+                                <li>分享自己的知识</li>
+                                <li>和其它人一起进步</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}
+
+<footer class="footer">
+    <p>Copyright ©2017 井冈山大学 10栋B区402室</p>
+    <p>Powered by Django&七牛云</p>
+</footer>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/login.js' %}"></script>
+{% block js %} {% endblock %}
+</body>
+</html>

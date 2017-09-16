@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users'
+    'users',
+    'captcha'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -135,3 +136,18 @@ AUTH_USER_MODEL = "users.UserProfile"
 AUTHENTICATION_BACKENDS = (
     'users.views.CustomBackend',
 )
+
+# 邮件相关配置
+# EMAIL_HOST = os.environ.get('EMAIL_HOST')
+# EMAIL_PORT = 25
+# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# EMAIL_USE_TLS = False
+# EMAIL_FROM = os.environ.get('EMAIL_FROM')
+
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'jgsuitclub@qq.com'
+EMAIL_HOST_PASSWORD = 'password'
+EMAIL_USE_TLS = True
+EMAIL_FROM = 'jgsuitclub@qq.com'

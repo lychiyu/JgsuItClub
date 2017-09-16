@@ -1,0 +1,45 @@
+.content .breadcrumb {
+    margin: 0;
+    padding: 0;
+}
+
+.content .breadcrumb a {
+    color: #80bd01;
+}
+
+.content form {
+    padding: 20px;
+}
+
+.content form button {
+    margin-right: 20px;
+}
+
+.content .forget {
+    display: inline-block;
+    padding: 20px 0;
+}
+
+.content .forget a {
+    color: #777;
+}
+
+.sidebar .about ul {
+    margin: 0 0 10px 25px;
+    list-style: disc;
+}
+
+.sidebar .about ul li {
+    line-height: 2em;
+}
+
+
+#error {
+    display: none;
+}
+
+.alert {
+    padding: 6px;
+    margin: 0;
+}
+

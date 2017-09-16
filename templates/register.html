@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block js %}
+    <script type="text/javascript">
+        // 注册
+        $('#register_btn').on('click', function () {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "{% url 'register' %}",
+                data: $('#register_form').serialize(),
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (data) {
+                    if (data.status == '1') {
+                        console.log(data.msg)
+                        $('#error').css('display', 'block');
+                        $('#error_msg').html(data.msg);
+                    }
+                    else if (data.status == '0') {
+                        $('#error').css('display', 'none');
+                        alert('注册成功,激活邮箱后登录')
+                        window.location.href = "{% url 'login' %}";
+                    }
+                    else {
+                        $('#error').css('display', 'block');
+                        $('#error_msg').html('输入不合法');
+                    }
+                },
+            });
+        });
+    </script>
+
+{% endblock %}

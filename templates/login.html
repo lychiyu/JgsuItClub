@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}登录{% endblock %}
+{% block content %}
+    <section class="col-md-9 .col-xs-12 content">
+        <div class="panel panel-default">
+            <div class="header">
+                <ol class="breadcrumb">
+                    <li><a href="#">首页</a></li>
+                    <li class="active">登录</li>
+                </ol>
+            </div>
+
+            <div class="panel-body">
+                <form class="form-horizontal" id="login_form">
+                    <div class="form-group">
+                        <label for="email" class="col-sm-2 control-label">邮箱</label>
+                        <div class="col-sm-5">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="请输入您的邮箱">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="col-sm-2 control-label">密码</label>
+                        <div class="col-sm-5">
+                            <input type="password" class="form-control" id="password" name="password"
+                                   placeholder="输入你的密码">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="captcha" class="col-sm-2 control-label">验证码</label>
+                        <div class="col-sm-5">
+                            {{ login_form.captcha }}
+
+                        </div>
+                    </div>
+                    <div class="form-group" id="error">
+                        <div class="col-sm-offset-1 col-sm-6">
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <strong id="error_msg"></strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" class="btn btn-primary" id="login_btn">登录</button>
+                            <a type="button" class="btn btn-success" href="{% url 'register' %}">没有账号?去注册</a>
+                            <p class="forget"><a href="">忘记密码?</a></p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+
+{% block js %}
+    <script type="text/javascript">
+        // 注册
+        $('#login_btn').on('click', function () {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "{% url 'login' %}",
+                data: $('#login_form').serialize(),
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (data) {
+                    if (data.status == '1') {
+                        console.log(data.msg)
+                        $('#error').css('display', 'block');
+                        $('#error_msg').html(data.msg);
+                    }
+                    else if (data.status == '0') {
+                        $('#error').css('display', 'none');
+                        window.location.href = "{% url 'index' %}";
+                    }
+                },
+            });
+        });
+    </script>
+
+{% endblock %}

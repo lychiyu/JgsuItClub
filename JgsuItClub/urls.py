@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 """JgsuItClub URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -13,9 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
+from users.views import RegisterView, LoginView, IndexView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', IndexView.as_view(), name='index'),
+    url(r'^captcha/', include('captcha.urls')),
+    url(r'^register/$', RegisterView.as_view(), name='register'),
+    url(r'^login/$', LoginView.as_view(), name='login'),
 ]
