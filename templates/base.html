@@ -42,7 +42,7 @@
                     <li><a href="{% url 'login' %}">登录</a></li>
                 {% endif %}
                 {% if request.user.is_authenticated %}
-                    <li><a href="#">退出</a></li>
+                    <li><a href="{% url 'logout' %}">退出</a></li>
                 {% endif %}
             </ul>
         </div>

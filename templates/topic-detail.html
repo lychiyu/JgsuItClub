@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}
+
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/editor/0.1.0/editor.css">
+{% endblock %}
+
+
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            <section class="col-md-9 .col-xs-12 content">
+                <div class="panel panel-default">
+                    <div class="header topic-detail">
+                        <span class="topic_full_title">
+                            {% if topic.is_top %}
+                                <span class="put_top">置顶</span>
+                            {% endif %}
+                            {{ topic.title }}</span>
+                        <div class="changes">
+                            <span>发布于{{ topic.create_time }}</span>
+                            <span>作者 <a href="/user/i5ting">{{ topic.author.nick_name }}</a></span>
+                            <span>{{ topic.click_nums }} 次浏览</span>
+                            <span> 来自 {{ topic.category.name }}</span>
+                            <button class=" btn btn-success pull-right" type="submit" value="">收藏</button>
+                        </div>
+                        <div class="manage_topic">
+                            <a href="/topic/59b8cb072db872766ed747cd/edit">
+                                <i class="glyphicon glyphicon-pencil" title="编辑"></i></a>
+                            <a href="javascript:;" class="delete_topic_btn"> <i class="glyphicon glyphicon-trash"
+                                                                                title="删除"></i></a>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        {{ topic.content }}
+                    </div>
+                </div>
+                <div class="panel panel-default comment-list">
+                    <div class="panel-heading">
+                        <span class="col_fade">{{ topic.comment_nums }}回复</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="author_content">
+                            <a href="" class="user_avatar">
+                                <img src="https://avatars3.githubusercontent.com/u/17508916?v=4&amp;s=120" alt="">
+                            </a>
+                            <div class="user_info">
+                                <a href="#" class="reply_author">zy445566</a>
+                                <a href="#" class="reply_time">4楼•4 个月前</a>
+                            </div>
+                            <div class="action pull-right">
+                                <a><i class="glyphicon glyphicon-trash"></i></a>
+                                <a><i class="glyphicon glyphicon-thumbs-up" style="margin-right: 5px"></i>12</a>
+                                <a id="reply_ico"><i class="glyphicon glyphicon-share-alt"
+                                                     style="margin-right: 5px"></i></a>
+                            </div>
+                            <div class="repl_content">
+                                是否可以考虑开个测试帖呢？
+                            </div>
+                            <div></div>
+                        </div>
+                        <div class="reply_content"></div>
+                    </div>
+                </div>
+                <div class="panel panel-default comment-add">
+                    <div class="panel-heading">
+                        <span class="col_fade">添加回复</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="markdown_editor in_editor">
+                            <div id="comment_editor">
+                                    <textarea id="comment-editor" class="editor" name="t_content" rows="20"
+                                              placeholder="文章支持 Markdown 语法, 请注意标记代码" style="display: none"></textarea>
+                                <div class="form-group">
+                                    <div class="col-sm-10">
+                                        <button type="submit" class="btn btn-primary">回复</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-3 .col-xs-0 sidebar">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">作者</span>
+                    </div>
+                    <div class="inner">
+                        <div class="user_card">
+                            <div>
+                                <a class="user_avatar" href="/user/lychiyu">
+                                    <img src="{{ topic.author.image }}"
+                                         title="{{ topic.author.nick_name }}">
+                                </a>
+                                <span class="user_name"><a class="dark"
+                                                           href="/user/lychiyu">{{ topic.author.nick_name }}</a></span>
+                                <div class="board clearfix">
+                                    <div class="floor">
+                                        <span class="big">积分: {{ topic.author.score }} </span>
+                                    </div>
+                                </div>
+                                <div class="space clearfix"></div>
+                                <span class="signature">“{{ topic.author.signature }}”</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="inner">
+                        <a href="{% url 'topic:create' %}" id="create_topic_btn">
+                            <button class="btn btn-success">发布话题</button>
+                        </a>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">作者其他话题</span>
+                    </div>
+                    <div class="inner">
+                        <ul class="unstyled">
+                            {% for other_topic in other_topics %}
+                                <li>
+                                    <div><a class="dark topic_title" href="{% url 'topic:detail' other_topic.id %}"
+                                            title="{{ other_topic.title }}">{{ other_topic.title }}</a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">无人回复的话题</span>
+                    </div>
+                    <div class="inner">
+                        <ul class="unstyled">
+
+                            {% for no_topic in no_comment_topics %}
+                                <li>
+                                    <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                            title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+        <!--<div id="backtotop" style="top: 28px; right: 0px; display: block;">回到顶部</div>-->
+    </div>
+{% endblock %}
+
+
+{% block js %}
+
+    <script src="https://cdn.jsdelivr.net/editor/0.1.0/editor.js"></script>
+    <script src="https://cdn.jsdelivr.net/editor/0.1.0/marked.js"></script>
+    <script>
+        var editor = new Editor({
+            element: document.getElementById('comment-editor'),
+        })
+
+        //    $('.icon-image').on('click', function () {
+        ////        alert($('.cm-string:last').html())
+        //    })
+        $('#reply_ico').on('click', function () {
+
+        })
+    </script>
+{% endblock %}

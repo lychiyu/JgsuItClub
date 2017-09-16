@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    发布话题
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/editor/0.1.0/editor.css">
+{% endblock %}
+
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            <section class="col-md-9 .col-xs-12 content">
+                <div class="panel panel-default">
+                    <div class="header">
+                        <ol class="breadcrumb">
+                            <li><a href="#">首页</a></li>
+                            <li class="active">发布话题</li>
+                        </ol>
+                    </div>
+
+                    <div class="panel-body">
+                        <form class="form-horizontal" id="topic_form">
+                            <fieldset>
+                                <div class="from-group">
+                                    <label style="text-align: left"
+                                           class="tab-selector col-sm-2 control-label">选择版块：</label>
+                                    <div class="col-sm-4" style="margin-bottom: 20px">
+                                        <select class="form-control" name="category" id="category">
+                                            <option value="">请选择</option>
+                                            <option value="分享">分享</option>
+                                            <option value="问答">问答</option>
+                                            <option value="测试">测试</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="from-group">
+                                <textarea style="resize: none;margin-bottom: 20px" autofocus="" class="form-control"
+                                          rows="1" id="title"
+                                          name="title" placeholder="标题字数 10 字以上"></textarea>
+                                </div>
+                                <div class="markdown_editor in_editor">
+                                    <div class="markdown_in_editor">
+                                    <textarea id="editor" class="editor" name="t_content" rows="20"
+                                              placeholder="文章支持 Markdown 语法, 请注意标记代码" style="display: none"></textarea>
+                                        <div class="form-group">
+                                            <div class="col-sm-10">
+                                                <button id="topic_sub" type="button" class="btn btn-primary">提交</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="topic_tags" name="topic_tags" value="">
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-3 .col-xs-0 sidebar">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">Markdown 语法参考</span>
+                    </div>
+                    <div class="inner">
+                        <ol>
+                            <li><tt>### 单行的标题</tt></li>
+                            <li><tt>**粗体**</tt></li>
+                            <li><tt>`console.log('行内代码')`</tt></li>
+                            <li><tt>```js\n code \n```</tt> 标记代码块</li>
+                            <li><tt>[内容](链接)</tt></li>
+                            <li><tt>![文字说明](图片链接)</tt></li>
+                        </ol>
+                        <span><a href="https://segmentfault.com/markdown" target="_blank">Markdown 文档</a></span>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">话题发布指南</span>
+                    </div>
+                    <div class="inner">
+                        <ol>
+                            <li>尽量把话题要点浓缩到标题里</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/editor/0.1.0/editor.js"></script>
+    <script src="https://cdn.jsdelivr.net/editor/0.1.0/marked.js"></script>
+
+    <script>
+        // 初始化编辑器
+        var editor = new Editor({
+            element: document.getElementById('editor'),
+        });
+        // 自定义上传图片
+        $('.icon-image').on('click', function () {
+//        alert($('.cm-string:last').html())
+        });
+        // 提交
+        $('#topic_sub').on('click', function () {
+            category = $('#category').val()
+            if (category === '') {
+                alert('请选择要发布的板块')
+                return
+            }
+            title = $('#title').val()
+            if (title === '' || title.length < 10) {
+                alert('标题不符合规范')
+                return
+            }
+            content = editor.codemirror.getValue()
+            if (content === '') {
+                alert('内容不能为空')
+                return
+            }
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "{% url 'topic:create' %}",
+                data: {'category': category, 'title': title, 'content': content},
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (data) {
+                    if (data.status == '1') {
+                        alert('发布失败')
+                    }
+                    else if (data.status == '0') {
+                        alert('发布成功' + data.msg);
+                        window.location.href = "{% url 'index' %}";
+                    }
+                },
+            });
+        })
+    </script>
+{% endblock %}
+
+

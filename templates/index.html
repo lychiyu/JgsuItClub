@@ -9,32 +9,32 @@
                 <div class="panel panel-default">
                     <div class="header">
                         <a href="#" class="topic-tab">首页</a>
-                        <a href="#" class="topic-tab current-tab">分享</a>
-                        <a href="#" class="topic-tab">问答</a>
-                        <a href="#" class="topic-tab">测试</a>
-                        <a href="#" class="topic-tab">招新</a>
+                        {% for cate in cates %}
+                            <a href="" class="topic-tab current-tab">{{ cate.name }}</a>
+                        {% endfor %}
+
                     </div>
-
                     <div class="list-group topic-list">
-                        <div class="list-group-item">
-                            <a class="user_avatar pull-left" href="#">
-                                <img src="https://avatars3.githubusercontent.com/u/17508916?v=4&amp;s=120"
-                                     title="chaoxihailing">
-                            </a>
-                            <span class="reply_count pull-left">
-                                <span class="count_of_replies" title="回复数">6</span>
-                                <span class="count_seperator">/</span>
-                                <span class="count_of_visits" title="点击数">137</span>
-                            </span>
-                            <span class="publish_time pull-right">2 小时前</span>
-                            <div class="topic_title_wrapper">
-                                <a class="topic_title" href="#"
-                                   title="想获得promise返回对象的属性，但是只能有获得对象">
-                                    想获得promise返回对象的属性，但是只能有获得对象想获得promise返回
-
+                        {% for topic in topics %}
+                            <div class="list-group-item">
+                                <a class="user_avatar pull-left" href="#">
+                                    <img src="{{ topic.author.image }}"
+                                         title="{{ topic.author.nick_name }}">
                                 </a>
+                                <span class="reply_count pull-left">
+                                <span class="count_of_replies" title="回复数">{{ topic.comment_nums }}</span>
+                                <span class="count_seperator">/</span>
+                                <span class="count_of_visits" title="点击数">{{ topic.click_nums }}</span>
+                            </span>
+                                <span class="publish_time pull-right">{{ topic.create_time }}</span>
+                                <div class="topic_title_wrapper">
+                                    <a class="topic_title" href="{% url 'topic:detail' topic.id %}"
+                                       title="{{ topic.title }}">
+                                        {{ topic.title }}
+                                    </a>
+                                </div>
                             </div>
-                        </div>
+                        {% endfor %}
 
                     </div>
                     <div aria-label="Page navigation">
@@ -65,9 +65,9 @@
                             <p>技术交流社区</p>
                             <div>
                                 您可以
-                                <a href="/signin">登录</a>
+                                <a href="{% url 'login' %}">登录</a>
                                 或
-                                <a href="/signup">注册</a>
+                                <a href="{% url 'register' %}">注册</a>
                             </div>
                         </div>
                     </div>
@@ -84,7 +84,8 @@
                                         <img src="{{ request.user.image }}"
                                              title="{{ request.user.nick_name }}">
                                     </a>
-                                    <span class="user_name"><a class="dark" href="/user/lychiyu">{{ request.user.nick_name }}</a></span>
+                                    <span class="user_name"><a class="dark"
+                                                               href="/user/lychiyu">{{ request.user.nick_name }}</a></span>
                                     <div class="board clearfix">
                                         <div class="floor">
                                             <span class="big">积分: {{ request.user.score }} </span>
@@ -98,7 +99,7 @@
                     </div>
                     <div class="panel panel-default">
                         <div class="inner">
-                            <a href="/topic/create" id="create_topic_btn">
+                            <a href="{% url 'topic:create' %}" id="create_topic_btn">
                                 <button class="btn btn-success">发布话题</button>
                             </a>
                         </div>
@@ -110,11 +111,13 @@
                     </div>
                     <div class="inner">
                         <ul class="unstyled">
-                            <li>
-                                <div><a class="dark topic_title" href="/topic/59b7f2ef3c896622428ec67b"
-                                        title="请使用 Macaca Puppeteer 驱动">请使用 Macaca Puppeteer 驱动</a>
-                                </div>
-                            </li>
+                            {% for no_topic in no_comment_topics %}
+                                <li>
+                                    <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                            title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                    </div>
+                                </li>
+                            {% endfor %}
 
                         </ul>
                     </div>
@@ -124,15 +127,15 @@
                     <div class="panel-heading">
                         <span class="col_fade">积分榜</span>
                         &nbsp;
-                        <a class="dark" href="/users/top100">TOP 30 &gt;&gt;</a>
                     </div>
                     <div class="inner">
                         <ol>
-                            <li>
-                                <span class="top_score">19735</span>
-                                <span class="user_name"><a href="/user/i5ting">i5ting</a></span>
-                            </li>
-
+                            {% for top_user in top_users %}
+                                <li>
+                                    <span class="top_score">{{ top_user.score }}</span>
+                                    <span class="user_name"><a href="/user/i5ting">{{ top_user.nick_name }}</a></span>
+                                </li>
+                            {% endfor %}
                         </ol>
 
                     </div>

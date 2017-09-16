@@ -13,6 +13,7 @@ from django.core.urlresolvers import reverse
 from users.models import UserProfile
 from users.forms import RegisterForm, LoginForm
 from utils.email_send import send_email
+from topics.models import Topic, Category
 
 
 # 自定义用户登录的逻辑
@@ -82,6 +83,30 @@ class LoginView(View):
             return HttpResponse('{"status":"1","msg":"输入不合法"}', content_type='application/json')
 
 
+class LogoutView(View):
+    """
+    退出登录
+    """
+
+    def get(self, request):
+        logout(request)
+        return HttpResponseRedirect(reverse("index"))
+
+
 class IndexView(View):
     def get(self, request):
-       return render(request,'index.html',{})
+        # 获取所有话题分类
+        cates = Category.objects.all()
+        # 获取所有话题
+        topics = Topic.objects.all()
+
+        # 无人回复的话题
+        no_comment_topics = Topic.objects.filter(comment_nums=0, category__in=(1, 2))[:10]
+        # 积分榜
+        top_users = UserProfile.objects.all().order_by('-score')[:15]
+        return render(request, 'index.html', {
+            'cates': cates,
+            'topics': topics,
+            'no_comment_topics': no_comment_topics,
+            'top_users': top_users
+        })
