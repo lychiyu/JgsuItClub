@@ -34,7 +34,7 @@
                 <li><a href="{% url 'index' %}">首页</a></li>
                 {% if request.user.is_authenticated %}
                     <li class="unread"><a href="#">未读消息 <span>1</span> </a></li>
-                    <li class="unread"><a href="{%  %}">设置 </a></li>
+                    <li class="unread"><a href="{% url 'user:setting' %}">设置 </a></li>
                 {% endif %}
                 <li><a href="#">关于</a></li>
                 {% if not request.user.is_authenticated %}

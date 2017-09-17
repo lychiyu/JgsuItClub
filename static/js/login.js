@@ -77,4 +77,5 @@ $(function () {
 
     $('#register_form .captcha').click({'form_id':'register_form'},refresh_captcha)
     $('#login_form .captcha').click({'form_id':'login_form'},refresh_captcha)
+    $('#forget_form .captcha').click({'form_id':'forget_form'},refresh_captcha)
 })

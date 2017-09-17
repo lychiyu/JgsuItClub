@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 from datetime import datetime
 
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -10,9 +9,10 @@ from django.contrib.auth.models import AbstractUser
 class UserProfile(AbstractUser):
     nick_name = models.CharField(max_length=50, verbose_name='昵称', default='')
     score = models.IntegerField(verbose_name='积分', default=0)
-    weibo = models.CharField(max_length=200, verbose_name='微博地址', default='')
-    github = models.CharField(max_length=200, verbose_name='Github地址', default='')
-    signature = models.CharField(max_length=200, verbose_name='个性签名', default='这家伙很懒，什么个性签名都没有留下。')
+    weibo = models.CharField(max_length=200, verbose_name='微博地址', default='', blank=True, null=True)
+    github = models.CharField(max_length=200, verbose_name='Github地址', default='', blank=True, null=True)
+    signature = models.CharField(max_length=200, verbose_name='个性签名', default='这家伙很懒，什么个性签名都没有留下。', blank=True,
+                                 null=True)
     image = models.CharField(max_length=200, verbose_name='用户头像的七牛云地址',
                              default='http://owcmz09se.bkt.clouddn.com/avatar.png')
 
@@ -35,4 +35,3 @@ class EmailVerifyRecode(models.Model):
     class Meta:
         verbose_name = "邮箱验证码"
         verbose_name_plural = verbose_name
-

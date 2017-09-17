@@ -20,3 +20,13 @@ class RegisterForm(forms.Form):
     password = forms.CharField(required=True, min_length=6,
                                error_messages={'required': u'密码不能为空', 'invalid': '密码必须大于6位'})
     captcha = CaptchaField(error_messages={'required': u'验证码不能为空', 'invalid': '验证码错误'})
+
+
+class ForgetPwdForm(forms.Form):
+    email = forms.EmailField(required=True, error_messages={'required': u'邮箱不能为空', 'invalid': '邮箱格式错误'})
+    captcha = CaptchaField(error_messages={'invalid': '验证码错误！'})
+
+
+class ModifyPwdForm(forms.Form):
+    password = forms.CharField(required=True)
+    new_password = forms.CharField(required=True)

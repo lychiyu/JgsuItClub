@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}
+    设置
+{% endblock %}
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            {% block content %}
+                <section class="col-md-9 .col-xs-12 content">
+                    <div class="panel panel-default">
+                        <div class="header">
+                            <ol class="breadcrumb">
+                                <li class="active">更改密码</li>
+                            </ol>
+                        </div>
+                        <div class="panel-body">
+                            <form class="form-horizontal" id="resetpwd_form">
+                                <div class="form-group">
+                                    <label for="email" class="col-sm-2 control-label">邮箱</label>
+                                    <div class="col-sm-5">
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               placeholder="请输入您的邮箱" value="{{ email }}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password" class="col-sm-2 control-label">当前密码</label>
+                                    <div class="col-sm-5">
+                                        <input type="password" class="form-control" id="password" name="password"
+                                               placeholder="请输入您的当前密码">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_password" class="col-sm-2 control-label">新密码</label>
+                                    <div class="col-sm-5">
+                                        <input type="password" class="form-control" id="new_password"
+                                               name="new_password"
+                                               placeholder="输入你的新密码密码不少于6位">
+
+                                    </div>
+                                </div>
+                                <div class="form-group" id="error">
+                                    <div class="col-sm-offset-1 col-sm-6">
+                                        <div class="alert alert-danger alert-dismissible" role="alert">
+                                            <strong id="error_msg"></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="button" class="btn btn-primary" id="resetpwd_btn">更改密码</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            {% endblock %}
+            {% block sidebar %}
+                <section class="col-md-3 .col-xs-0 sidebar">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">关于</span>
+                        </div>
+                        <div class="inner about">
+                            <p>技术交流社区</p>
+                            <p>在这里你可以：</p>
+                            <ul>
+                                <li>向别人提出你遇到的问题</li>
+                                <li>帮助遇到问题的人</li>
+                                <li>分享自己的知识</li>
+                                <li>和其它人一起进步</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(function () {
+            $('#resetpwd_btn').on('click', function () {
+                var password = $('#password').val();
+                var new_password = $('#new_password').val();
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'user:resetpwd' %}",
+                    data: {"password": password, "new_password": new_password},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        {# 提交csrf #}
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == '0') {
+                            alert(data.msg);
+                            window.location.href = "{% url 'login' %}";
+                        } else {
+                            alert('修改密码失败');
+                            $('#password').val('');
+                            $('#new_password').val('');
+                        }
+                    },
+                });
+            })
+        })
+    </script>
+{% endblock %}

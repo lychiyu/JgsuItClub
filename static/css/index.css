@@ -206,6 +206,12 @@ ol, ul {
     padding: 20px;
 }
 
+
+#user_image{
+    width: 100px;
+    height: 100px;
+}
+
 /*话题详情页end*/
 
 .sidebar .inner {

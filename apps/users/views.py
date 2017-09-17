@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
+import os
 import json
+import uuid
 
 from django.shortcuts import render
 from django.contrib.auth.backends import ModelBackend
@@ -9,13 +11,18 @@ from django.db.models import Q
 from django.views.generic import View
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from JgsuItClub.settings import MEDIA_ROOT
 
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
 from users.models import UserProfile, EmailVerifyRecode
-from users.forms import RegisterForm, LoginForm
+from users.forms import RegisterForm, LoginForm, ForgetPwdForm, ModifyPwdForm
 from utils.email_send import send_email
 from topics.models import Topic, Category
+from utils.mixin_util import LoginRequiredMixin
+from utils.qiniusdk import qiniu_upload_file
 
 
 # 自定义用户登录的逻辑
@@ -110,7 +117,7 @@ class AciveUserView(View):
                 'title': '激活失败',
                 'msg': '激活失败',
             })
-        return render(request, 'login.html')
+        return HttpResponseRedirect(reverse('login'))
 
 
 class IndexView(View):
@@ -152,3 +159,111 @@ class IndexView(View):
         })
 
 
+class UserSettingView(LoginRequiredMixin, View):
+    def get(self, request):
+        return render(request, 'seeting.html', {'userprofile': request.user})
+
+    def post(self, request):
+        """
+        用户修改个人信息
+        :param request:
+        :return:
+        """
+        weibo = request.POST.get('weibo', '')
+        github = request.POST.get('github', '')
+        signature = request.POST.get('signature', '')
+        request.user.weibo = weibo
+        request.user.github = github
+        request.user.signature = signature
+        request.user.save()
+        return HttpResponse('{"status":"0","msg":"修改个人信息成功"}', content_type='application/json')
+
+
+class UserResetPwdView(LoginRequiredMixin, View):
+    def post(self, request):
+        password = request.POST.get('password')
+        new_password = request.POST.get('new_password')
+        # 验证用户
+        user = authenticate(username=request.user.email, password=password)
+        if user is not None:
+            request.user.password = make_password(new_password)
+            request.user.save()
+            logout(request)
+            return HttpResponse('{"status":"0","msg":"修改密码成功"}', content_type='application/json')
+        else:
+            return HttpResponse('{"status":"1","msg":"修改密码失败"}', content_type='application/json')
+
+
+class ForgetPwdView(View):
+    def get(self, request):
+        forget_form = ForgetPwdForm()
+        return render(request, 'forget.html', {'forget_form': forget_form})
+
+    def post(self, request):
+        host = request.get_host()
+        scheme = str(request.scheme)
+        hosts = scheme + '://' + str(host)
+        forget_form = ForgetPwdForm(request.POST)
+        if forget_form.is_valid():
+            email = request.POST.get('email', '')
+            send_email(email, hosts, 'forget')
+            return render(request, 'skip.html', {'msg': '重置密码链接已经发送至您的邮箱，请查收！'})
+        else:
+            return render(request, 'forget.html', {"forget_form": forget_form, 'msg': '输入不合法'})
+
+
+class ResetPwdView(View):
+    def get(self, request, code):
+        all_recodes = EmailVerifyRecode.objects.filter(code=code)
+        if all_recodes:
+            for recode in all_recodes:
+                email = recode.email
+                return render(request, 'resetpwd.html', {'email': email})
+        else:
+            return render(request, 'skip.html', {'msg': '找回密码失败'})
+        return render(request, 'login.html')
+
+
+class ModifyPwdView(View):
+    """
+    用户未登录修改用户密码
+    """
+
+    def post(self, request):
+        modifypwd_form = ModifyPwdForm(request.POST)
+        if modifypwd_form.is_valid():
+            email = request.POST.get('email', '')
+            password = request.POST.get('password', '')
+            new_password = request.POST.get('new_password', '')
+            if password == new_password:
+                user = UserProfile.objects.get(email=email)
+                user.password = make_password(new_password)
+                user.save()
+                return render(request, 'login.html')
+            else:
+                return render(request, 'resetpwd.html', {'msg': '两次输入的密码不同'})
+        else:
+            email = request.POST.get("email", "")
+            return render(request, 'resetpwd.html', {'modifypwd_view': modifypwd_form.errors, 'email': email})
+
+
+class UploadImage(LoginRequiredMixin, View):
+    def post(self, request):
+        # 获取文件后先存在本地，再转存至七牛云
+        file_obj = request.FILES.get('file', None)
+        file_ext = ""
+        if file_obj.name.rfind('.') > 0:
+            file_ext = file_obj.name.rsplit('.', 1)[1].strip().lower()
+            file_name = str(uuid.uuid1()).replace('-', '') + '.' + file_ext
+        path = default_storage.save('' + file_name, ContentFile(file_obj.read()))
+        # 保存在本地的临时路径
+        temp_file = os.path.join(MEDIA_ROOT, path)
+
+        # 上传到七牛云 返回的是 七牛云上存储的地址
+        image_url = qiniu_upload_file(file_name, temp_file)
+
+        # 删除保存在本地的临时文件
+        os.remove(temp_file)
+        request.user.image = image_url
+        request.user.save()
+        return HttpResponseRedirect('/user/setting/')

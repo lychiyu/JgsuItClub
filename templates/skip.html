@@ -3,5 +3,20 @@
     {{ title }}
 {% endblock %}
 {% block content %}
-    {{ msg }}
+    <section class="col-md-9 .col-xs-12 content">
+                    <div class="panel panel-default">
+                        {% block bread %}
+                            <div class="header">
+                                <ol class="breadcrumb">
+                                    <li><a href="/">首页</a></li>
+                                    <li class="active">提示</li>
+                                </ol>
+                            </div>
+                        {% endblock %}
+                        <div class="panel-body">
+                            {{ msg }}
+                        </div>
+                    </div>
+                </section>
+
 {% endblock %}
