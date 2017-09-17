@@ -27,6 +27,7 @@ class Topic(models.Model):
     is_top = models.BooleanField(default=False, verbose_name='话题是否置顶')
     is_show = models.BooleanField(default=True, verbose_name='话题是否显示')
     click_nums = models.IntegerField(default=0, verbose_name='浏览数')
+    fav_nums = models.IntegerField(default=0, verbose_name='收藏数')
     comment_nums = models.IntegerField(default=0, verbose_name='评论数')
     category = models.ForeignKey(Category, verbose_name='话题分类')
     author = models.ForeignKey(UserProfile, verbose_name='话题发布者')

@@ -8,14 +8,18 @@
             <section class="col-md-9 .col-xs-12 content">
                 <div class="panel panel-default">
                     <div class="header">
-                        <a href="#" class="topic-tab">首页</a>
-                        {% for cate in cates %}
-                            <a href="" class="topic-tab current-tab">{{ cate.name }}</a>
-                        {% endfor %}
-
+                        <a href="{% url 'index' %}"
+                           class="topic-tab {% if cate_id == '0' %}current-tab{% endif %}">首页</a>
+                        <a href="{% url 'index' %}?cate=1"
+                           class="topic-tab {% if cate_id == '1' %}current-tab{% endif %}">分享</a>
+                        <a href="{% url 'index' %}?cate=2"
+                           class="topic-tab {% if cate_id == '2' %}current-tab{% endif %}">问答</a>
+                        <a href="{% url 'index' %}?cate=3"
+                           class="topic-tab {% if cate_id == '3' %}current-tab{% endif %}">测试</a>
+                        <a href="" class="topic-tab">招新</a>
                     </div>
                     <div class="list-group topic-list">
-                        {% for topic in topics %}
+                        {% for topic in topics.object_list %}
                             <div class="list-group-item">
                                 <a class="user_avatar pull-left" href="#">
                                     <img src="{{ topic.author.image }}"
@@ -38,23 +42,27 @@
 
                     </div>
                     <div aria-label="Page navigation">
-                        <ul class="pagination">
-                            <li>
-                                <a href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li><a href="#">1</a></li>
-                            <li><a href="#">2</a></li>
-                            <li><a href="#">3</a></li>
-                            <li><a href="#">4</a></li>
-                            <li><a href="#">5</a></li>
-                            <li>
-                                <a href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
+                            <ul class="pagination">
+                                {% if topics.has_previous %}
+                                    <li class="long"><a href="?{{ topics.previous_page_number.querystring }}"
+                                                        class="long">上一页</a></li>
+                                {% endif %}
+                                {% for page in topics.pages %}
+                                    {% if page %}
+                                        {% ifequal page topics.number %}
+                                            <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                                        {% else %}
+                                            <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                        {% endifequal %}
+                                    {% else %}
+                                        <li class="none"><a href="">...</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if topics.has_next %}
+                                    <li class="long"><a href="?{{ topics.next_page_number.querystring }}">下一页</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
                     </div>
                 </div>
             </section>

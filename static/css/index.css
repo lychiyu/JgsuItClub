@@ -286,6 +286,13 @@ ol, ul {
 }
 
 
+.comment-list .author_content{
+    margin-bottom: 10px;
+}
+.comment-list .author_content .comment_content{
+    padding-left: 50px;
+}
+
 .sidebar .user_card  .user_name{
     padding-left: 10px;
 }

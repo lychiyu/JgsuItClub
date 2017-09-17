@@ -141,7 +141,7 @@
             $.ajax({
                 cache: false,
                 type: "POST",
-                url: "{% url 'topic:create' %}",
+                url: "{% url 'topic:update' id %}",
                 data: {'category': category, 'title': title, 'content': content},
                 async: true,
                 beforeSend: function (xhr, settings) {
@@ -149,10 +149,10 @@
                 },
                 success: function (data) {
                     if (data.status == '1') {
-                        alert('发布失败')
+                        alert('修改失败')
                     }
                     else if (data.status == '0') {
-                        alert('发布成功');
+                        alert('修改成功');
                         var id = parseInt(data.msg);
                         window.location.href = "/topic/detail/" + id;
                     }

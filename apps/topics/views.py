@@ -3,9 +3,12 @@
 import json
 from django.shortcuts import render
 from django.views.generic import View
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.core.serializers import serialize
 
 from .models import Category, Topic
+from operation.models import UserFavorite, UserComment
 from utils.mixin_util import LoginRequiredMixin
 
 
@@ -38,49 +41,175 @@ class TopicUpdateView(LoginRequiredMixin, View):
     def get(self, request, topic_id):
         # 先获取当前用户，只有话题作者和超级用户可以编辑话题
         curr_user = request.user
-        # 根据id获取话题
-        topic = Topic.objects.get(id=topic_id, is_show=True)
+        try:
+            # 根据id获取话题
+            topic = Topic.objects.get(id=topic_id, is_show=True)
+        except Exception as e:
+            topic = None
 
         if topic is not None:
             if curr_user.is_superuser or topic.author.id == curr_user.id:
                 data = {"status": "0", 'title': topic.title, 'content': topic.content}
                 return HttpResponse(json.dumps(data), content_type='application/json')
             else:
-                return HttpResponse({"status": "1", "msg": "你不具备权限"}, content_type='application/json')
+                return HttpResponse(json.dumps({"status": "1", "msg": "你不具备权限"}), content_type='application/json')
         else:
-            return HttpResponse({"status": "1", "msg": "话题不存在"}, content_type='application/json')
+            return HttpResponse(json.dumps({"status": "1", "msg": "话题不存在"}), content_type='application/json')
+
+    def post(self, request, topic_id):
+        cate = request.POST.get('category')
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        category = Category.objects.get(name=cate)
+        try:
+            topic = Topic.objects.get(id=int(topic_id))
+        except Exception as e:
+            topic = topic()
+        topic.title = title
+        topic.content = content
+        topic.category = category
+        topic.author = request.user
+        topic.author.save()
+        topic.save()
+        data = {"status": "0", "msg": topic.id}
+        return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 class TopicDetailView(View):
     def get(self, request, topic_id):
-        # 获取该话题
-        topic = Topic.objects.get(id=topic_id, is_show=True)
-        topic.click_nums += 1
-        topic.save()
-        # 作者其他话题
-        user = topic.author
-        other_topics = user.topic_set.filter(is_show=True, category__in=(1, 2))[:10]
-        # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
-        return render(request, 'topic-detail.html', {
-            'topic': topic,
-            'other_topics': other_topics,
-            'no_comment_topics': no_comment_topics,
-        })
+        try:
+            # 根据id获取话题
+            topic = Topic.objects.get(id=topic_id, is_show=True)
+        except Exception as e:
+            topic = None
+        if topic is not None:
+            topic.click_nums += 1
+            topic.save()
+            # 作者其他话题
+            user = topic.author
+            other_topics = user.topic_set.filter(is_show=True, category__in=(1, 2))[:10]
+            # 无人回复的话题
+            no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+
+            all_comments = UserComment.objects.filter(topic=topic)
+            return render(request, 'topic-detail.html', {
+                'topic': topic,
+                'other_topics': other_topics,
+                'no_comment_topics': no_comment_topics,
+                'all_comments': all_comments,
+            })
+        else:
+            return HttpResponseRedirect(reverse('index'))
 
 
 class TopicDeleteView(LoginRequiredMixin, View):
-    def get(self, request, topic_id):
+    def post(self, request, topic_id):
         # 先获取当前用户，只有话题作者和超级用户可以删除话题
         curr_user = request.user
-        # 根据id获取话题
-        topic = Topic.objects.get(id=topic_id, is_show=True)
+        try:
+            # 根据id获取话题
+            topic = Topic.objects.get(id=topic_id, is_show=True)
+        except Exception as e:
+            topic = None
+
         if topic is not None:
             if curr_user.is_superuser or topic.author.id == curr_user.id:
                 topic.is_show = False
                 topic.save()
-                return HttpResponse({"status": "0", "msg": "删除成功"}, content_type='application/json')
+                return HttpResponse(json.dumps({"status": "0", "msg": "删除成功"}), content_type='application/json')
             else:
-                return HttpResponse({"status": "1", "msg": "你不具备权限"}, content_type='application/json')
+                return HttpResponse(json.dumps({"status": "1", "msg": "你不具备权限"}), content_type='application/json')
         else:
-            return HttpResponse({"status": "1", "msg": "话题不存在"}, content_type='application/json')
+            return HttpResponse(json.dumps({"status": "1", "msg": "话题不存在"}), content_type='application/json')
+
+
+class AddFavView(LoginRequiredMixin, View):
+    """
+    用户收藏话题操作
+    """
+
+    def post(self, request):
+        # 收藏的话题id
+        fav_id = request.POST.get('fav_id', 0)
+        # 判断是否已经收藏了,如果已经收藏了,就取消收藏
+        exist_recodes = UserFavorite.objects.filter(user=request.user, fav_id=int(fav_id))
+        if exist_recodes:
+            # 取消收藏
+            exist_recodes.delete()
+
+            topic = Topic.objects.get(id=int(fav_id))
+            topic.fav_nums -= 1
+            if topic.fav_nums < 0:
+                topic.fav_nums = 0
+            topic.save()
+            return HttpResponse('{"status":"0","msg":"收藏"}', content_type='application/json')
+        else:
+            if int(fav_id) > 0:
+                user_fav = UserFavorite()
+                user_fav.fav_id = int(fav_id)
+                user_fav.user = request.user
+                user_fav.save()
+                topic = Topic.objects.get(id=int(fav_id))
+                topic.fav_nums += 1
+                topic.save()
+                return HttpResponse('{"status":"0","msg":"已收藏"}', content_type='application/json')
+            else:
+                return HttpResponse('{"status":"1","msg":"收藏失败"}', content_type='application/json')
+
+
+class AddCommentView(LoginRequiredMixin, View):
+    def post(self, request):
+        # 获取主机信息用于发送激活链接
+        host = request.get_host()
+        scheme = str(request.scheme)
+        hosts = scheme + '://' + str(host)
+
+        # 获取评论对象id,评论类型,评论内容
+        topic_id = request.POST.get('topic_id')
+        entity_id = request.POST.get('entity_id')
+        entity_type = request.POST.get('entity_type')
+        comments = request.POST.get('comments')
+        # 根据topic_id获取评论的话题
+        comment_topic = Topic.objects.get(id=int(topic_id))
+        comment_entity = UserComment()
+
+        comment_entity.user = request.user
+        comment_entity.topic = comment_topic
+        comment_entity.entity_id = entity_id
+        comment_entity.entity_type = entity_type
+        # 评论话题
+        if entity_type == '1':
+            comment_entity.comments = comments
+            comment_entity.save()
+
+        # 评论用户的评论
+        if entity_type == '2':
+            # 获取评论用户评论 的那条评论
+            to_comment = UserComment.objects.get(id=entity_id)
+            # 然后在获取发布该条评论的用户
+            to_user = to_comment.user
+            # 拼接评论内容
+            comments = '''[@{0}]({1}/user/info/{2})
+{3}'''.format(to_user.nick_name, hosts, to_user.id, comments)
+            comment_entity.comments = comments
+            comment_entity.save()
+
+        # 回复数需要加1
+        comment_topic.comment_nums += 1
+        comment_topic.save()
+        # 用户回复积分+1
+        comment_entity.user.score += 1
+        comment_entity.user.save()
+        return HttpResponse('{"status":"0","msg":"回复成功"}', content_type='application/json')
+
+
+class RemoveCommentView(LoginRequiredMixin, View):
+    def get(self, request, comm_id):
+        # 只有超级用户可以屏蔽回复
+        if request.user.is_superuser:
+            # 根据主键来获取该条评论
+            comment = UserComment.objects.get(id=int(comm_id))
+            comment.is_show = False
+            comment.comments = "该回复已被屏蔽"
+            comment.save()
+        return HttpResponseRedirect('/topic/detail/' + comm_id)

@@ -41,9 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'topics',
+    'operation',
     'captcha',
     'xadmin',
     'crispy_forms',
+    'pure_pagination',
 ]
 
 MIDDLEWARE_CLASSES = [

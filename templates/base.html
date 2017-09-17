@@ -22,7 +22,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">技术交流社区</a>
+            <a class="navbar-brand" href="{% url 'index' %}">技术交流社区</a>
         </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <form id="search_form" class="navbar-form navbar-left" action="/search">
@@ -34,7 +34,7 @@
                 <li><a href="{% url 'index' %}">首页</a></li>
                 {% if request.user.is_authenticated %}
                     <li class="unread"><a href="#">未读消息 <span>1</span> </a></li>
-                    <li class="unread"><a href="#">设置 </a></li>
+                    <li class="unread"><a href="{%  %}">设置 </a></li>
                 {% endif %}
                 <li><a href="#">关于</a></li>
                 {% if not request.user.is_authenticated %}

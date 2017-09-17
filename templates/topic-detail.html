@@ -25,7 +25,10 @@
                             <span>作者 <a href="/user/i5ting">{{ topic.author.nick_name }}</a></span>
                             <span>{{ topic.click_nums }} 次浏览</span>
                             <span> 来自 {{ topic.category.name }}</span>
-                            <button class=" btn btn-success pull-right" type="submit" value="">收藏</button>
+                            {% if request.user.is_authenticated %}
+                                <button class="btn btn-success pull-right" type="button" id="fav_btn" value="">收藏
+                                </button>
+                            {% endif %}
                         </div>
                         <div class="manage_topic">
                             {% if request.user.is_superuser or request.user.id == topic.author.id %}
@@ -41,43 +44,77 @@
                 </div>
                 <div class="panel panel-default comment-list">
                     <div class="panel-heading">
-                        <span class="col_fade">{{ topic.comment_nums }}回复</span>
+                        <span class="col_fade">{{ topic.comment_nums }} 回复</span>
                     </div>
                     <div class="panel-body">
-                        <div class="author_content">
-                            <a href="" class="user_avatar">
-                                <img src="https://avatars3.githubusercontent.com/u/17508916?v=4&amp;s=120" alt="">
-                            </a>
-                            <div class="user_info">
-                                <a href="#" class="reply_author">zy445566</a>
-                                <a href="#" class="reply_time">4楼•4 个月前</a>
+                        {% for comment in all_comments %}
+                            <div class="author_content">
+                                <a href="" class="user_avatar">
+                                    <img src="{{ comment.user.image }}" alt="{{ comment.user.nick_name }}">
+                                </a>
+                                <div class="user_info">
+                                    <a href="#" class="reply_author">{{ comment.user.nick_name }}</a>
+                                    <a href="#" class="reply_time">{{ comment.comment_time }}</a>
+                                </div>
+                                <div class="action pull-right">
+                                    {% if request.user.is_superuser %}
+                                        <!-- 屏蔽 -->
+                                        <a href="{% url 'topic:remove_comment' comment.id %}"><i
+                                                class="glyphicon glyphicon-trash"></i></a>
+                                    {% endif %}
+                                    {% if request.user.is_authenticated %}
+                                        <!-- 回复 -->
+                                        <a id="reply_ico{{ comment.id }}" comm_data="{{ comment.id }}"
+                                           class="reply_ico"><i
+                                                class="glyphicon glyphicon-share-alt"
+                                                style="margin-right: 5px"></i></a>
+                                    {% endif %}
+                                </div>
+                                <div class="comment_content">{{ comment.comments }}</div>
+                                <div class="panel panel-default other_editor_{{ comment.id }}" style="display: none">
+                                    <div class="panel-heading">
+                                        <span class="col_fade">添加回复</span>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="markdown_editor in_editor">
+                                            <div id="comment_editor">
+                                    <textarea id="editor_{{ comment.id }}" class="editor_{{ comment.id }}"
+                                              name="content{{ comment.id }}" rows="10"
+                                              placeholder="回复支持 Markdown 语法, 请注意标记代码" style="display: none">
+                                                                   </textarea>
+                                                </textarea>
+                                                <div class="form-group">
+                                                    <div class="col-sm-10">
+                                                        <button id="btn_comment_{{ comment.id }}" type="button"
+                                                                class="btn btn-primary">回复
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="action pull-right">
-                                <a><i class="glyphicon glyphicon-trash"></i></a>
-                                <a><i class="glyphicon glyphicon-thumbs-up" style="margin-right: 5px"></i>12</a>
-                                <a id="reply_ico"><i class="glyphicon glyphicon-share-alt"
-                                                     style="margin-right: 5px"></i></a>
-                            </div>
-                            <div class="repl_content">
-                                是否可以考虑开个测试帖呢？
-                            </div>
-                            <div></div>
-                        </div>
+                        {% endfor %}
                         <div class="reply_content"></div>
                     </div>
                 </div>
-                <div class="panel panel-default comment-add">
+
+                <div class="panel panel-default comment-add" {% if not request.user.is_authenticated %}
+                     style="display: none" {% endif %}>
                     <div class="panel-heading">
                         <span class="col_fade">添加回复</span>
                     </div>
                     <div class="panel-body">
                         <div class="markdown_editor in_editor">
                             <div id="comment_editor">
-                                    <textarea id="comment-editor" class="editor" name="t_content" rows="20"
-                                              placeholder="文章支持 Markdown 语法, 请注意标记代码" style="display: none"></textarea>
+                                    <textarea id="editor" class="editor" name="t_content" rows="20"
+                                              placeholder="文章支持 Markdown 语法, 请注意标记代码" style="display: none">
+                                    </textarea>
                                 <div class="form-group">
                                     <div class="col-sm-10">
-                                        <button type="submit" class="btn btn-primary">回复</button>
+                                        <button id="topic_comment" type="button" class="btn btn-primary">回复</button>
                                     </div>
                                 </div>
                             </div>
@@ -160,25 +197,30 @@
 
 
 {% block js %}
-
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-
     <script>
         $(function () {
-            var simplemde = new SimpleMDE({element: $("#editor")[0]});
+            // 渲染md文本的编辑器状态隐藏
+            var simplemde = new SimpleMDE({element: $("#editor")[0], autofocus: true});
             md_content = $('.html_content').html();
             htmlText = simplemde.markdown(md_content);
             $('.html_content').html(htmlText);
 
 
+            // $('.comment_content')[1].html(simplemde.markdown($('.comment_content')[1].html()));
+            commont_list = $('.comment_content')
+            for (var i = 0; i < commont_list.length; i++) {
+                content_md = $(commont_list[i]).html()
+                content_html = simplemde.markdown(content_md)
+                $(commont_list[i]).html(content_html)
+            }
+
             $('.delete_topic_btn').on('click', function () {
                 alert('确认要删除吗？');
-                topic_id = $('.delete_topic_btn').attr('delete-data');
-                console.log(topic_id);
                 $.ajax({
                     cache: false,
-                    type: "GET",
-                    url: "/topic/delete/" + parseInt(topic_id),
+                    type: "POST",
+                    url: "/topic/delete/" + "{{ topic.id }}",
                     async: true,
                     beforeSend: function (xhr, settings) {
                         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
@@ -188,11 +230,86 @@
                             alert(data.msg)
                         }
                         else if (data.status == '0') {
-                            alert(data.msg);
                             window.location.href = "{% url 'index' %}";
                         }
                     },
                 });
+            })
+
+            //收藏分享
+            //收藏分享
+            function add_fav(current_elem, fav_id) {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'topic:add_fav' %}",
+                    data: {'fav_id': fav_id},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        {# 提交csrf #}
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == '1') {
+                            alert(data.msg)
+                        } else if (data.status == '0') {
+                            current_elem.text(data.msg)
+                        }
+                    },
+                });
+            }
+
+            $('#fav_btn').on('click', function () {
+                add_fav($(this), {{ topic.id }});
+            });
+
+            // 添加评论or回复
+            function add_comment(entity_id, entity_type, comments) {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'topic:add_comment' %}",
+                    data: {
+                        'topic_id':{{ topic.id }},
+                        'entity_id': entity_id,
+                        "entity_type": entity_type,
+                        'comments': comments
+                    },
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        {# 提交csrf #}
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == '1') {
+                            alert(data.msg);
+                        } else if (data.status == '0') {
+                            alert(data.msg);
+                            window.location.href = "{% url 'topic:detail' topic.id %}";
+                        }
+                    },
+                });
+            }
+
+            $('#topic_comment').on('click', function () {
+                comments = simplemde.value();
+                add_comment({{ topic.id }}, 1, comments)
+            })
+
+            // 回复回复的回复
+            $('a[id^=reply_ico]').each(function () {
+                $(this).on('click', function () {
+                    id = $(this).attr('comm_data');
+                    $('.other_editor_' + id).css('display', 'block');
+                    var other_simplemde = new SimpleMDE({element: $("#editor_" + id)[0], autofocus: true});
+                    $(this).css('display', 'none')
+
+                    // 回复
+                    $('#btn_comment_' + id).on('click', function () {
+                        comments = other_simplemde.value();
+                        add_comment({{ topic.id }}, 2, comments)
+                    })
+                })
             })
         })
     </script>

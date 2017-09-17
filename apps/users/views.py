@@ -10,6 +10,8 @@ from django.views.generic import View
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
+from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
+
 from users.models import UserProfile, EmailVerifyRecode
 from users.forms import RegisterForm, LoginForm
 from utils.email_send import send_email
@@ -113,18 +115,40 @@ class AciveUserView(View):
 
 class IndexView(View):
     def get(self, request):
+        # 获取cate参数
+        cate_id = request.GET.get('cate', '0')
+        if cate_id == 0:
+            # 获取所有话题
+            topics = Topic.objects.filter(is_show=True, category__in=(1, 2))
+        else:
+            try:
+                category = Category.objects.get(id=int(cate_id))
+                # 获取对应话题
+                topics = Topic.objects.filter(is_show=True, category=category)
+            except Exception as e:
+                cate_id = '0'
+                topics = Topic.objects.filter(is_show=True, category__in=(1, 2))
+
+        # 分页
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(topics, 3, request=request)
+        page_topics = p.page(page)
+
         # 获取所有话题分类
         cates = Category.objects.all()
-        # 获取所有话题
-        topics = Topic.objects.filter(is_show=True)
-
         # 无人回复的话题
         no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
         return render(request, 'index.html', {
             'cates': cates,
-            'topics': topics,
+            'topics': page_topics,
             'no_comment_topics': no_comment_topics,
-            'top_users': top_users
+            'top_users': top_users,
+            'cate_id': cate_id
         })
+
+
