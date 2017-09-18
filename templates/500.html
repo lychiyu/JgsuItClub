@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}
+    访问的页面错误
+{% endblock %}
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            <section class="col-md-12 .col-xs-12 content">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="error_wraper" style="text-align: center;">
+                            <a href="{% url 'index' %}"><img src="http://owcmz09se.bkt.clouddn.com/500.jpg" style="cursor: pointer;height: auto;max-width: 100%;vertical-align: middle;border: 0;" alt=""></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+{% endblock %}

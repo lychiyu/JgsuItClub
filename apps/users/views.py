@@ -13,6 +13,8 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.shortcuts import render_to_response
+
 from JgsuItClub.settings import MEDIA_ROOT
 
 from config import DOMAIN_PREFIX
@@ -153,17 +155,20 @@ class IndexView(View):
         # 获取所有话题分类
         cates = Category.objects.all()
         # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
-                                                                                                             '-create_time')[
-                            :10]
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top','-create_time')[:10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
+
+        # 是否打开招新功能
+        apply_cate = Category.objects.get(id=4)
+
         return render(request, 'index.html', {
             'cates': cates,
             'topics': page_topics,
             'no_comment_topics': no_comment_topics,
             'top_users': top_users,
-            'cate_id': cate_id
+            'cate_id': cate_id,
+            'apply_cate': apply_cate,
         })
 
 
@@ -468,3 +473,17 @@ class EnrollListView(LoginRequiredMixin, View):
             'no_comment_topics': no_comment_topics,
             'top_users': top_users,
         })
+
+
+# 404
+def page_not_found(request):
+    response = render_to_response('404.html', {})
+    response.status_code = 404
+    return response
+
+
+# 500
+def page_error(request):
+    response = render_to_response('500.html', {})
+    response.status_code = 500
+    return response

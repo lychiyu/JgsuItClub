@@ -16,7 +16,9 @@
                            class="topic-tab {% if cate_id == '2' %}current-tab{% endif %}">问答</a>
                         <a href="{% url 'index' %}?cate=3"
                            class="topic-tab {% if cate_id == '3' %}current-tab{% endif %}">测试</a>
-                        <a href="{% url 'enroll' %}" class="topic-tab">招新</a>
+                        {% if apply_cate.is_show %}
+                            <a href="{% url 'enroll' %}" class="topic-tab">招新</a>
+                        {% endif %}
                     </div>
                     <div class="list-group topic-list">
                         {% if topics %}
@@ -51,35 +53,35 @@
                         {% endif %}
 
                     </div>
-                        <div aria-label="Page navigation">
-                            <ul class="pagination">
-                                {% if topics.has_previous %}
-                                    <li>
-                                        <a href="?{{ topics.previous_page_number.querystring }}" aria-label="Previous">
-                                            <span aria-hidden="true">&laquo;</span>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                {% for page in topics.pages %}
-                                    {% if page %}
-                                        {% ifequal page topics.number %}
-                                            <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
-                                        {% else %}
-                                            <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
-                                        {% endifequal %}
+                    <div aria-label="Page navigation">
+                        <ul class="pagination">
+                            {% if topics.has_previous %}
+                                <li>
+                                    <a href="?{{ topics.previous_page_number.querystring }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for page in topics.pages %}
+                                {% if page %}
+                                    {% ifequal page topics.number %}
+                                        <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
                                     {% else %}
-                                        <li class="none"><a href="">...</a></li>
-                                    {% endif %}
-                                {% endfor %}
-                                {% if topics.has_next %}
-                                    <li>
-                                        <a href="?{{ topics.next_page_number.querystring }}" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
+                                        <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                    {% endifequal %}
+                                {% else %}
+                                    <li class="none"><a href="">...</a></li>
                                 {% endif %}
-                            </ul>
-                        </div>
+                            {% endfor %}
+                            {% if topics.has_next %}
+                                <li>
+                                    <a href="?{{ topics.next_page_number.querystring }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
                 </div>
             </section>
             <section class="col-md-3 .col-xs-0 sidebar">

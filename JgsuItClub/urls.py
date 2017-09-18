@@ -19,6 +19,10 @@ from django.contrib import admin
 from users.views import RegisterView, LoginView, LogoutView, AciveUserView, IndexView
 from users.views import ForgetPwdView, ResetPwdView, ModifyPwdView, MessageView, MessageReadView
 from users.views import EnrollView, EnrollDetailView, EnrollListView
+from django.views.static import serve
+from settings import STATIC_ROOT
+
+
 
 import xadmin
 
@@ -43,4 +47,12 @@ urlpatterns = [
     url(r'^enroll_list/$', EnrollListView.as_view(), name="enroll_list"),
     url(r'^topic/', include('topics.urls', namespace='topic')),
     url(r'^user/', include('users.urls', namespace='user')),
+    # 配置static,解决debug为false时static路径设置无效
+    url(r'^static/(?P<path>.*)$', serve, {'document_root': STATIC_ROOT}),
 ]
+
+
+# 全局404页面配置
+handler404 = 'users.views.page_not_found'
+# 全局500页面配置
+handler500 = 'users.views.page_error'

@@ -26,9 +26,9 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'extra_app'))
 SECRET_KEY = '3qscn@@&b_kr)rorqw^$3pjaba@r)ig@-9+cn36ng6@yshbyzi'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*',]
 
 # Application definition
 
@@ -135,6 +135,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 # 自定义用户认证模型
 AUTH_USER_MODEL = "users.UserProfile"
 
@@ -154,7 +156,7 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_HOST = 'smtp.qq.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'jgsuitclub@qq.com'
-EMAIL_HOST_PASSWORD = 'tqimicddsndhcjch'
+EMAIL_HOST_PASSWORD = 'xxxx'
 EMAIL_USE_TLS = True
 EMAIL_FROM = 'jgsuitclub@qq.com'
 
