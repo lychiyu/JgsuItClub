@@ -6,8 +6,8 @@ import qiniu
 import qiniu.config
 
 # 需要填写你的 Access Key 和 Secret Key
-access_key = 'xxx'
-secret_key = 'xxx'
+access_key = 'xxxxxxxxx'
+secret_key = 'xxxxxxxxx'
 
 # 构建鉴权对象
 q = qiniu.Auth(access_key, secret_key)

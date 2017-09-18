@@ -222,6 +222,53 @@
             htmlText = simplemde.markdown(md_content);
             $('.html_content').html(htmlText);
 
+            // 回复话题的回复编辑器拖拽上传图片
+            simplemde.codemirror.on("drop", function (editor, e) {
+                if (!(e.dataTransfer && e.dataTransfer.files)) {
+                    alert("该浏览器不支持操作");
+                    return;
+                }
+                for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                    console.log(e.dataTransfer.files[i]);
+                    fileUpload(e.dataTransfer.files[i], simplemde);
+                }
+                e.preventDefault();
+            });
+
+            //文件上传
+            function fileUpload(fileObj, simplemde) {
+                var data = new FormData();
+                data.append("file", fileObj);
+                var xhr = new XMLHttpRequest();
+                xhr.open("post", "{% url 'topic:upload' %}", true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        res = JSON.parse(xhr.responseText);
+                        if (res.status === '1') {
+                            alert("上传失败")
+                        }
+                        if (res.status === '0') {
+                            // 将图片链接添加到原来的后面
+                            old_val = simplemde.value()
+                            new_val = old_val + res.msg
+                            simplemde.value(new_val)
+                        }
+
+                    }
+                };
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.send(data);
+            }
+
+            //阻止浏览器默认打开拖拽文件的行为
+            window.addEventListener("drop", function (e) {
+                e = e || event;
+                e.preventDefault();
+                if (e.target.tagName == "textarea") {  // check wich element is our target
+                    e.preventDefault();
+                }
+            }, false);
+
 
             // $('.comment_content')[1].html(simplemde.markdown($('.comment_content')[1].html()));
             commont_list = $('.comment_content')
@@ -346,7 +393,19 @@
                     id = $(this).attr('comm_data');
                     $('.other_editor_' + id).css('display', 'block');
                     var other_simplemde = new SimpleMDE({element: $("#editor_" + id)[0], autofocus: true});
-                    $(this).css('display', 'none')
+                    // 回复用户的回复的编辑器拖拽图片上传
+                    other_simplemde.codemirror.on("drop", function (editor, e) {
+                        if (!(e.dataTransfer && e.dataTransfer.files)) {
+                            alert("该浏览器不支持操作");
+                            return;
+                        }
+                        for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                            console.log(e.dataTransfer.files[i]);
+                            fileUpload(e.dataTransfer.files[i], other_simplemde);
+                        }
+                        e.preventDefault();
+                    });
+                    $(this).css('display', 'none');
 
                     // 回复
                     $('#btn_comment_' + id).on('click', function () {

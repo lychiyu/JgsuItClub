@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import json
+import uuid
+import os
 from django.shortcuts import render
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 from .models import Category, Topic
 from operation.models import UserFavorite, UserComment, UserMessage
+
 from utils.mixin_util import LoginRequiredMixin
 
+from utils.qiniusdk import qiniu_upload_file
 from config import DOMAIN_PREFIX
+from JgsuItClub.settings import MEDIA_ROOT
 
 
 class TopicCreateView(LoginRequiredMixin, View):
@@ -266,3 +273,30 @@ class RemoveCommentView(LoginRequiredMixin, View):
             comment.comments = "该回复已被屏蔽"
             comment.save()
         return HttpResponseRedirect('/topic/detail/' + comm_id)
+
+
+class UploadImageView(LoginRequiredMixin, View):
+    """
+    上传图片
+    """
+
+    def post(self, request):
+        # 获取文件后先存在本地，再转存至七牛云
+        file_obj = request.FILES.get('file', None)
+        file_ext = ""
+        if file_obj.name.rfind('.') > 0:
+            file_ext = file_obj.name.rsplit('.', 1)[1].strip().lower()
+            file_name = str(uuid.uuid1()).replace('-', '') + '.' + file_ext
+        path = default_storage.save('' + file_name, ContentFile(file_obj.read()))
+        # 保存在本地的临时路径
+        temp_file = os.path.join(MEDIA_ROOT, path)
+
+        # 上传到七牛云 返回的是 七牛云上存储的地址
+        image_url = qiniu_upload_file(file_name, temp_file)
+
+        # 删除保存在本地的临时文件
+        os.remove(temp_file)
+        # 拼接成markdown的图片形式
+        image_url = "\n![]({0})".format(image_url)
+        data = {"status": "0", "msg": image_url}
+        return HttpResponse(json.dumps(data), content_type='application/json')

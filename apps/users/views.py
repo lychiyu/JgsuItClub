@@ -155,7 +155,9 @@ class IndexView(View):
         # 获取所有话题分类
         cates = Category.objects.all()
         # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top','-create_time')[:10]
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
+                                                                                                             '-create_time')[
+                            :10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
 
@@ -284,7 +286,7 @@ class UserInfoView(View):
         # 获取该用户的信息
         user = UserProfile.objects.get(id=user_id)
         # 获取该用户近期创建的话题
-        topics = Topic.objects.filter(author=user).order_by('-create_time')[:15]
+        topics = Topic.objects.filter(author=user).order_by('-is_top', '-create_time')[:15]
         # 获取该用户收藏的话题数
         fav_nums = UserFavorite.objects.filter(user=user).count()
 
@@ -473,6 +475,20 @@ class EnrollListView(LoginRequiredMixin, View):
             'no_comment_topics': no_comment_topics,
             'top_users': top_users,
         })
+
+
+class UserSetSuperView(LoginRequiredMixin, View):
+    """
+    设置为超级管理员
+    """
+
+    def get(self, request, user_id):
+        if request.user.is_superuser:
+            user = UserProfile.objects.get(id=user_id)
+            user.is_superuser = True
+            user.save()
+
+        return HttpResponseRedirect('/user/info/' + user_id)
 
 
 # 404

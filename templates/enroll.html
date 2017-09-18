@@ -120,10 +120,54 @@
             // 初始化编辑器
             var simplemde = new SimpleMDE({element: $("#editor")[0]});
 
-            // 自定义上传图片
-            $('.fa-picture-o').on('click', function () {
-                // alert($('.cm-string:last').html('https://test'))
+            // 拖拽上传图片
+            simplemde.codemirror.on("drop", function (editor, e) {
+                if (!(e.dataTransfer && e.dataTransfer.files)) {
+                    alert("该浏览器不支持操作");
+                    return;
+                }
+                for (var i = 0; i < e.dataTransfer.files.length; i++) {
+                    console.log(e.dataTransfer.files[i]);
+                    fileUpload(e.dataTransfer.files[i]);
+                }
+                e.preventDefault();
             });
+
+            //文件上传
+            function fileUpload(fileObj) {
+                var data = new FormData();
+                data.append("file", fileObj);
+                var xhr = new XMLHttpRequest();
+                xhr.open("post", "{% url 'topic:upload' %}", true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4) {
+                        res = JSON.parse(xhr.responseText);
+                        if (res.status === '1') {
+                            alert("上传失败")
+                        }
+                        if (res.status === '0') {
+                            // 将图片链接添加到原来的后面
+                            old_val = simplemde.value()
+                            new_val = old_val + res.msg
+                            simplemde.value(new_val)
+                        }
+
+                    }
+                };
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                xhr.send(data);
+            }
+
+            //阻止浏览器默认打开拖拽文件的行为
+            window.addEventListener("drop", function (e) {
+                e = e || event;
+                e.preventDefault();
+                if (e.target.tagName == "textarea") {  // check wich element is our target
+                    e.preventDefault();
+                }
+            }, false);
+
+
             // 提交
             $('#reason_btn').on('click', function () {
                 name = $('#name').val();

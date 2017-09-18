@@ -5,6 +5,7 @@ __date__ = '17-9-16 下午4:40'
 from django.conf.urls import url
 from .views import TopicCreateView, TopicDetailView, TopicUpdateView, TopicDeleteView
 from .views import AddFavView, AddCommentView, RemoveCommentView, TopicTopView
+from .views import UploadImageView
 
 urlpatterns = [
     # 发布话题
@@ -23,4 +24,6 @@ urlpatterns = [
     url(r'^add_comment/$', AddCommentView.as_view(), name="add_comment"),
     # 屏蔽评论or回复
     url(r'^remove_comment/(?P<comm_id>\d+)/$', RemoveCommentView.as_view(), name="remove_comment"),
+    # 上传图片
+    url(r'^upload/$', UploadImageView.as_view(), name="upload"),
 ]

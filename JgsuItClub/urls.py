@@ -20,7 +20,7 @@ from users.views import RegisterView, LoginView, LogoutView, AciveUserView, Inde
 from users.views import ForgetPwdView, ResetPwdView, ModifyPwdView, MessageView, MessageReadView
 from users.views import EnrollView, EnrollDetailView, EnrollListView
 from django.views.static import serve
-from settings import STATIC_ROOT
+# from settings import STATIC_ROOT
 
 
 
@@ -48,7 +48,7 @@ urlpatterns = [
     url(r'^topic/', include('topics.urls', namespace='topic')),
     url(r'^user/', include('users.urls', namespace='user')),
     # 配置static,解决debug为false时static路径设置无效
-    url(r'^static/(?P<path>.*)$', serve, {'document_root': STATIC_ROOT}),
+    # url(r'^static/(?P<path>.*)$', serve, {'document_root': STATIC_ROOT}),
 ]
 
 

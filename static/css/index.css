@@ -387,6 +387,18 @@ ol, ul {
     margin: 0;
 }
 
+#back-to-top{
+    cursor: pointer;
+    position: fixed;
+    bottom: 100px;
+    right: -10px;
+    padding: 16px;
+    background-color: #f5f5f5;
+    color: #404040;
+    border-radius: 8px;
+    z-index: 1000;
+}
+
 @media (max-width: 768px ) {
     .content .header .topic-tab {
         display: inline-block;

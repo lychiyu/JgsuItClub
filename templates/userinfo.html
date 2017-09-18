@@ -44,7 +44,15 @@
                                             <a class="dark" href="{{ user.weibo }}" target="_blank">{{ user.weibo }}</a>
                                         </li>
                                     {% endif %}
-                                    <li><p class="col_fade">注册时间 {{ user.date_joined }}</p></li>
+                                    <li><p class="col_fade">注册时间 {{ user.date_joined }}</p>
+{#                                        {% if not user.is_superuser %}#}
+{#                                            {% if request.user.is_superuser %}#}
+{#                                                <a href="{% url 'user:set_super' user.id %}" style="color: #ffefef"#}
+{#                                                   type="button" id="super_btn"#}
+{#                                                   class="btn btn-success">设为管理员</a>#}
+{#                                            {% endif %}#}
+{#                                        {% endif %}#}
+                                    </li>
                                 </ul>
                             </div>
 
@@ -178,3 +186,4 @@
         <!--<div id="backtotop" style="top: 28px; right: 0px; display: block;">回到顶部</div>-->
     </div>
 {% endblock %}
+

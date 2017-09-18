@@ -26,9 +26,13 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'extra_app'))
 SECRET_KEY = '3qscn@@&b_kr)rorqw^$3pjaba@r)ig@-9+cn36ng6@yshbyzi'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# DEBUG = False
+#
+# ALLOWED_HOSTS = ['*',]
 
-ALLOWED_HOSTS = ['*',]
+DEBUG = True
+
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -131,11 +135,11 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 # 自定义静态资源路径 debug为true时有效
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # 自定义用户认证模型
 AUTH_USER_MODEL = "users.UserProfile"
