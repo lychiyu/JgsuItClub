@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
-
+{% load staticfiles %}
 {% block title %}
 
 {% endblock %}
 
 {% block css %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
 {% endblock %}
 
 
@@ -22,11 +23,19 @@
                             {{ topic.title }}</span>
                         <div class="changes">
                             <span>发布于{{ topic.create_time }}</span>
-                            <span>作者 <a href="/user/i5ting">{{ topic.author.nick_name }}</a></span>
+                            <span>作者 <a
+                                    href="{% url 'user:info' topic.author.id %}">{{ topic.author.nick_name }}</a></span>
                             <span>{{ topic.click_nums }} 次浏览</span>
                             <span> 来自 {{ topic.category.name }}</span>
                             {% if request.user.is_authenticated %}
-                                <button class="btn btn-success pull-right" type="button" id="fav_btn" value="">收藏
+                                <button class="btn btn-success pull-right" type="button" id="fav_btn" value="">
+                                    {% if has_fav %}已收藏{% else %}收藏{% endif %}
+                                </button>
+                            {% endif %}
+                            {% if request.user.is_superuser %}
+                                <button style="margin-right: 20px" class="btn btn-success pull-right" type="button"
+                                        id="top_btn" value="">
+                                    {% if topic.is_top %}已置顶{% else %}置顶{% endif %}
                                 </button>
                             {% endif %}
                         </div>
@@ -40,7 +49,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="panel-body html_content">{{ topic.content }}</div>
+                    <div class="panel-body html_content render_con">{{ topic.content }}</div>
                 </div>
                 <div class="panel panel-default comment-list">
                     <div class="panel-heading">
@@ -70,7 +79,7 @@
                                                 style="margin-right: 5px"></i></a>
                                     {% endif %}
                                 </div>
-                                <div class="comment_content">{{ comment.comments }}</div>
+                                <div class="comment_content render_con" >{{ comment.comments }}</div>
                                 <div class="panel panel-default other_editor_{{ comment.id }}" style="display: none">
                                     <div class="panel-heading">
                                         <span class="col_fade">添加回复</span>
@@ -131,20 +140,21 @@
                     <div class="inner">
                         <div class="user_card">
                             <div>
-                                <a class="user_avatar" href="/user/lychiyu">
+                                <a class="user_avatar" href="{% url 'user:info' topic.author.id
+                                 %}">
                                     <img src="{{ topic.author.image }}"
                                          title="{{ topic.author.nick_name }}">
                                 </a>
                                 <span class="user_name"><a class="dark"
-                                                           href="/user/lychiyu">{{ topic.author.nick_name }}</a></span>
+                                                           href="{% url 'user:info' topic.author.id %}">{{ topic.author.nick_name }}</a></span>
                                 <div class="board clearfix">
                                     <div class="floor">
                                         <span class="big">积分: {{ topic.author.score }} </span>
                                     </div>
                                 </div>
                                 <div class="space clearfix"></div>
-                                <span class="signature">“{% if request.user.signature == '' %}
-                                    这家伙很懒，什么个性签名都没有留下。{% else %}{{ request.user.signature }}{% endif %}”</span>
+                                <span class="signature">“{% if topic.author.signature == '' %}
+                                    这家伙很懒，什么个性签名都没有留下。{% else %}{{ topic.author.signature }}{% endif %}”</span>
                             </div>
                         </div>
                     </div>
@@ -156,40 +166,43 @@
                         </a>
                     </div>
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="col_fade">作者其他话题</span>
+                {% if other_topics %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">作者其他话题</span>
+                        </div>
+                        <div class="inner">
+                            <ul class="unstyled">
+                                {% for other_topic in other_topics %}
+                                    <li>
+                                        <div><a class="dark topic_title" href="{% url 'topic:detail' other_topic.id %}"
+                                                title="{{ other_topic.title }}">{{ other_topic.title }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                    <div class="inner">
-                        <ul class="unstyled">
-                            {% for other_topic in other_topics %}
-                                <li>
-                                    <div><a class="dark topic_title" href="{% url 'topic:detail' other_topic.id %}"
-                                            title="{{ other_topic.title }}">{{ other_topic.title }}</a>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="col_fade">无人回复的话题</span>
-                    </div>
-                    <div class="inner">
-                        <ul class="unstyled">
+                {% endif %}
+                {% if no_comment_topics %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">无人回复的话题</span>
+                        </div>
+                        <div class="inner">
+                            <ul class="unstyled">
 
-                            {% for no_topic in no_comment_topics %}
-                                <li>
-                                    <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
-                                            title="{{ no_topic.title }}">{{ no_topic.title }}</a>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                                {% for no_topic in no_comment_topics %}
+                                    <li>
+                                        <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                                title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-
+                {% endif %}
             </section>
         </div>
         <!--<div id="backtotop" style="top: 28px; right: 0px; display: block;">回到顶部</div>-->
@@ -203,7 +216,7 @@
         $(function () {
             // 渲染md文本的编辑器状态隐藏
             var simplemde = new SimpleMDE({element: $("#editor")[0], autofocus: true});
-            md_content = $('.html_content').html();
+            md_content = $('.html_content').text();
             htmlText = simplemde.markdown(md_content);
             $('.html_content').html(htmlText);
 
@@ -263,6 +276,34 @@
             $('#fav_btn').on('click', function () {
                 add_fav($(this), {{ topic.id }});
             });
+
+
+            // 置顶与取消置顶
+            function top(current_elem, top_id) {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'topic:top' %}",
+                    data: {'top_id': top_id},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        {# 提交csrf #}
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == '1') {
+                            alert(data.msg)
+                        } else if (data.status == '0') {
+                            current_elem.text(data.msg)
+                        }
+                    },
+                });
+            }
+
+            $('#top_btn').on('click', function () {
+                top($(this), {{ topic.id }});
+            });
+
 
             // 添加评论or回复
             function add_comment(entity_id, entity_type, comments) {

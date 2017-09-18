@@ -23,6 +23,7 @@ from utils.email_send import send_email
 from topics.models import Topic, Category
 from utils.mixin_util import LoginRequiredMixin
 from utils.qiniusdk import qiniu_upload_file
+from operation.models import UserFavorite
 
 
 # 自定义用户登录的逻辑
@@ -126,12 +127,12 @@ class IndexView(View):
         cate_id = request.GET.get('cate', '0')
         if cate_id == 0:
             # 获取所有话题
-            topics = Topic.objects.filter(is_show=True, category__in=(1, 2))
+            topics = Topic.objects.filter(is_show=True, category__in=(1, 2)).order_by('-is_top', '-create_time')
         else:
             try:
                 category = Category.objects.get(id=int(cate_id))
                 # 获取对应话题
-                topics = Topic.objects.filter(is_show=True, category=category)
+                topics = Topic.objects.filter(is_show=True, category=category).order_by('-is_top', '-create_time')
             except Exception as e:
                 cate_id = '0'
                 topics = Topic.objects.filter(is_show=True, category__in=(1, 2))
@@ -267,3 +268,97 @@ class UploadImage(LoginRequiredMixin, View):
         request.user.image = image_url
         request.user.save()
         return HttpResponseRedirect('/user/setting/')
+
+
+class UserInfoView(View):
+    def get(self, request, user_id):
+        # 获取该用户的信息
+        user = UserProfile.objects.get(id=user_id)
+        # 获取该用户近期创建的话题
+        topics = Topic.objects.filter(author=user).order_by('-create_time')[:15]
+        # 获取该用户收藏的话题数
+        fav_nums = UserFavorite.objects.filter(user=user).count()
+
+        # 无人回复的话题
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+        # 积分榜
+        top_users = UserProfile.objects.all().order_by('-score')[:15]
+
+        return render(request, 'userinfo.html', {
+            'user': user,
+            'topics': topics,
+            'fav_nums': fav_nums,
+            'no_comment_topics': no_comment_topics,
+            'top_users': top_users,
+        })
+
+
+class UserTopicsView(View):
+    """
+    用户发表的所有话题
+    """
+
+    def get(self, request, user_id):
+        user = UserProfile.objects.get(id=user_id)
+        topics = Topic.objects.filter(author=user).order_by('-create_time')
+        # 分页
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(topics, 15, request=request)
+        page_topics = p.page(page)
+
+        # 无人回复的话题
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+        # 积分榜
+        top_users = UserProfile.objects.all().order_by('-score')[:15]
+        return render(request, 'usertopics.html', {
+            'topics': page_topics,
+            'user': user,
+            'no_comment_topics': no_comment_topics,
+            'top_users': top_users,
+        })
+
+
+class UserFavTopicsView(View):
+    """
+    用户收藏的话题列表
+    """
+
+    def get(self, request, user_id):
+        topics = []
+        user = UserProfile.objects.get(id=user_id)
+        fav_topics = UserFavorite.objects.filter(user=user)
+        for fav_topic in fav_topics:
+            topic_id = fav_topic.fav_id
+            topic = Topic.objects.get(id=topic_id)
+            topics.append(topic)
+
+        # 分页
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+        p = Paginator(topics, 15, request=request)
+        page_topics = p.page(page)
+
+        # 无人回复的话题
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+        # 积分榜
+        top_users = UserProfile.objects.all().order_by('-score')[:15]
+        return render(request, 'userfavtopics.html', {
+            'user': user,
+            'topics': page_topics,
+            'no_comment_topics': no_comment_topics,
+            'top_users': top_users,
+        })
+
+
+class MessageView(LoginRequiredMixin, View):
+    """
+    处理我的消息
+    """
+
+    def get(self, request):
+        return render(request, 'message.html', {})

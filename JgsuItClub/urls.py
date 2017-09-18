@@ -17,7 +17,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from users.views import RegisterView, LoginView, LogoutView, AciveUserView, IndexView
-from users.views import ForgetPwdView, ResetPwdView, ModifyPwdView
+from users.views import ForgetPwdView, ResetPwdView, ModifyPwdView,MessageView
 
 import xadmin
 
@@ -31,6 +31,8 @@ urlpatterns = [
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
     url(r'^forget/$', ForgetPwdView.as_view(), name='forget'),
     url(r'^reset/(?P<code>.*)/$', ResetPwdView.as_view(), name='user_active'),
+    # 消息
+    url(r'^message/$', MessageView.as_view(), name='message'),
     url(r'^modify_pwd/$', ModifyPwdView.as_view(), name="modify_pwd"),
     url(r'^topic/', include('topics.urls', namespace='topic')),
     url(r'^user/', include('users.urls', namespace='user')),

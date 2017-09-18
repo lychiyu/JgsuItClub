@@ -19,51 +19,67 @@
                         <a href="" class="topic-tab">招新</a>
                     </div>
                     <div class="list-group topic-list">
-                        {% for topic in topics.object_list %}
-                            <div class="list-group-item">
-                                <a class="user_avatar pull-left" href="#">
-                                    <img src="{{ topic.author.image }}"
-                                         title="{{ topic.author.nick_name }}">
-                                </a>
-                                <span class="reply_count pull-left">
+                        {% if topics %}
+                            {% for topic in topics.object_list %}
+                                <div class="list-group-item">
+                                    <a class="user_avatar pull-left" href="{% url 'user:info' topic.author.id %}">
+                                        <img src="{{ topic.author.image }}"
+                                             title="{{ topic.author.nick_name }}">
+                                    </a>
+                                    <span class="reply_count pull-left">
                                 <span class="count_of_replies" title="回复数">{{ topic.comment_nums }}</span>
                                 <span class="count_seperator">/</span>
                                 <span class="count_of_visits" title="点击数">{{ topic.click_nums }}</span>
                             </span>
-                                <span class="publish_time pull-right">{{ topic.create_time }}</span>
-                                <div class="topic_title_wrapper">
-                                    <a class="topic_title" href="{% url 'topic:detail' topic.id %}"
-                                       title="{{ topic.title }}">
-                                        {{ topic.title }}
-                                    </a>
+                                    <span class="publish_time pull-right">{{ topic.create_time }}</span>
+                                    <div class="topic_title_wrapper">
+
+                                        <a class="topic_title" href="{% url 'topic:detail' topic.id %}"
+                                           title="{{ topic.title }}">
+                                            {% if topic.is_top %}
+                                                <span class="put_top is_top">置顶</span>
+                                            {% else %}
+                                                <span class="put_top isnot_top">{{ topic.category.name }}</span>
+                                            {% endif %}
+                                            {{ topic.title }}
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <p style="padding: 20px">该板块暂时没有话题发布</p>
+                        {% endif %}
 
                     </div>
-                    <div aria-label="Page navigation">
-                        <ul class="pagination">
-                            {% if topics.has_previous %}
-                                <li class="long"><a href="?{{ topics.previous_page_number.querystring }}"
-                                                    class="long">上一页</a></li>
-                            {% endif %}
-                            {% for page in topics.pages %}
-                                {% if page %}
-                                    {% ifequal page topics.number %}
-                                        <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
-                                    {% else %}
-                                        <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
-                                    {% endifequal %}
-                                {% else %}
-                                    <li class="none"><a href="">...</a></li>
+                        <div aria-label="Page navigation">
+                            <ul class="pagination">
+                                {% if topics.has_previous %}
+                                    <li>
+                                        <a href="?{{ topics.previous_page_number.querystring }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
                                 {% endif %}
-                            {% endfor %}
-                            {% if topics.has_next %}
-                                <li class="long"><a href="?{{ topics.next_page_number.querystring }}">下一页</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
+                                {% for page in topics.pages %}
+                                    {% if page %}
+                                        {% ifequal page topics.number %}
+                                            <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                                        {% else %}
+                                            <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                        {% endifequal %}
+                                    {% else %}
+                                        <li class="none"><a href="">...</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if topics.has_next %}
+                                    <li>
+                                        <a href="?{{ topics.next_page_number.querystring }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
                 </div>
             </section>
             <section class="col-md-3 .col-xs-0 sidebar">
@@ -88,12 +104,12 @@
                         <div class="inner">
                             <div class="user_card">
                                 <div>
-                                    <a class="user_avatar" href="/user/lychiyu">
+                                    <a class="user_avatar" href="{% url 'user:info' request.user.id %}">
                                         <img src="{{ request.user.image }}"
                                              title="{{ request.user.nick_name }}">
                                     </a>
                                     <span class="user_name"><a class="dark"
-                                                               href="/user/lychiyu">{{ request.user.nick_name }}</a></span>
+                                                               href="{% url 'user:info' request.user.id %}">{{ request.user.nick_name }}</a></span>
                                     <div class="board clearfix">
                                         <div class="floor">
                                             <span class="big">积分: {{ request.user.score }} </span>
@@ -114,24 +130,24 @@
                         </div>
                     </div>
                 {% endif %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="col_fade">无人回复的话题</span>
+                {% if no_comment_topics %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">无人回复的话题</span>
+                        </div>
+                        <div class="inner">
+                            <ul class="unstyled">
+                                {% for no_topic in no_comment_topics %}
+                                    <li>
+                                        <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                                title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
-                    <div class="inner">
-                        <ul class="unstyled">
-                            {% for no_topic in no_comment_topics %}
-                                <li>
-                                    <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
-                                            title="{{ no_topic.title }}">{{ no_topic.title }}</a>
-                                    </div>
-                                </li>
-                            {% endfor %}
-
-                        </ul>
-                    </div>
-                </div>
-
+                {% endif %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <span class="col_fade">积分榜</span>
@@ -142,7 +158,8 @@
                             {% for top_user in top_users %}
                                 <li>
                                     <span class="top_score">{{ top_user.score }}</span>
-                                    <span class="user_name"><a href="/user/i5ting">{{ top_user.nick_name }}</a></span>
+                                    <span class="user_name"><a
+                                            href="{% url 'user:info' top_user.id %}">{{ top_user.nick_name }}</a></span>
                                 </li>
                             {% endfor %}
                         </ol>

@@ -77,6 +77,13 @@ class TopicUpdateView(LoginRequiredMixin, View):
 
 class TopicDetailView(View):
     def get(self, request, topic_id):
+        # 当前用户是否收藏了该话题
+        has_fav = False
+        if request.user.is_authenticated():
+            user_fav = UserFavorite.objects.filter(user=request.user, fav_id=topic_id)
+            if user_fav:
+                has_fav = True
+
         try:
             # 根据id获取话题
             topic = Topic.objects.get(id=topic_id, is_show=True)
@@ -97,6 +104,7 @@ class TopicDetailView(View):
                 'other_topics': other_topics,
                 'no_comment_topics': no_comment_topics,
                 'all_comments': all_comments,
+                'has_fav': has_fav,
             })
         else:
             return HttpResponseRedirect(reverse('index'))
@@ -155,6 +163,32 @@ class AddFavView(LoginRequiredMixin, View):
                 return HttpResponse('{"status":"0","msg":"已收藏"}', content_type='application/json')
             else:
                 return HttpResponse('{"status":"1","msg":"收藏失败"}', content_type='application/json')
+
+
+class TopicTopView(LoginRequiredMixin, View):
+    """
+    话题置顶操作
+    """
+
+    def post(self, request):
+        if request.user.is_superuser:
+            # 获取需要置顶的话题的id
+            top_id = request.POST.get('top_id', 0)
+            # 获取话题
+            topic = Topic.objects.get(id=top_id)
+            # 判断该话题是否已经处于置顶状态
+            if topic.is_top:
+                # 置顶状态，取消置顶
+                topic.is_top = False
+                topic.save()
+                return HttpResponse('{"status":"0","msg":"置顶"}', content_type='application/json')
+            else:
+                # 未置顶状态，置顶
+                topic.is_top = True
+                topic.save()
+                return HttpResponse('{"status":"0","msg":"已置顶"}', content_type='application/json')
+        else:
+            return HttpResponse('{"status":"1","msg":"没有权限"}', content_type='application/json')
 
 
 class AddCommentView(LoginRequiredMixin, View):

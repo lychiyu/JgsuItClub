@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}
+    我的消息
+{% endblock %}
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            <section class="col-md-9 .col-xs-12 content">
+                <div class="panel panel-default">
+                    <div class="header">
+                        <ol class="breadcrumb">
+                            <li><a href="{% url 'index' %}">主页</a></li>
+                            <li class="active"></li>
+                        </ol>
+                    </div>
+                    <div class="panel-body" id="userinfo">
+                        <div class="inner userinfo">
+                            <div class="avatar">
+                                <div class="user_big_avatar">
+                                    <img src="{{ user.image }}"
+                                         class="user_avatar" title="{{ user.nick_name }}">
+                                </div>
+                                <a class="dark nick_name">{{ user.nick_name }}</a>
+                            </div>
+                            <div class="user_profile">
+                                <ul class="unstyled">
+                                    <span class="big">{{ user.score }}</span> 积分
+                                    <li>
+                                        <a class="dark" href="{% url 'user:fav_list' user.id %}" target="_blank">
+                                            <span class="big collect-topic-count">{{ fav_nums }}</span>个话题收藏
+                                        </a>
+                                    </li>
+                                    {% if user.github %}
+                                        <li>
+                                            <span class="">Github: </span>
+                                            <a class="dark" href="{{ user.github }}" target="_blank">
+                                                {{ user.github }}https://github.com/lychiyu
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if user.weibo %}
+                                        <li>
+                                            <span>weibo</span>
+                                            <a class="dark" href="{{ user.weibo }}" target="_blank">{{ user.weibo }}</a>
+                                        </li>
+                                    {% endif %}
+                                    <li><p class="col_fade">注册时间 {{ user.date_joined }}</p></li>
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">最近创建的话题</span>
+                    </div>
+                    <div class="list-group topic-list">
+                        {% for topic in topics %}
+                            <div class="list-group-item">
+                                <a class="user_avatar pull-left" href="#">
+                                    <img style="width: 40px;height: 40px;" src="{{ topic.author.image }}"
+                                         title="{{ topic.author.nick_name }}">
+                                </a>
+                                <span class="reply_count pull-left">
+                                <span class="count_of_replies" title="回复数">{{ topic.comment_nums }}</span>
+                                <span class="count_seperator">/</span>
+                                <span class="count_of_visits" title="点击数">{{ topic.click_nums }}</span>
+                            </span>
+                                <span class="publish_time pull-right">{{ topic.create_time }}</span>
+                                <div class="topic_title_wrapper">
+                                    <a class="topic_title" style="color: #08c;" href="{% url 'topic:detail' topic.id %}"
+                                       title="{{ topic.title }}">
+                                        {{ topic.title }}
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="panel-footer">
+                        <a class="dark" href="{% url 'user:topic_list' user.id %}">查看更多»</a>
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-3 .col-xs-0 sidebar">
+                {% if not request.user.is_authenticated %}
+                    <div class="panel panel-default">
+                        <div class="inner">
+                            <p>技术交流社区</p>
+                            <div>
+                                您可以
+                                <a href="{% url 'login' %}">登录</a>
+                                或
+                                <a href="{% url 'register' %}">注册</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">个人信息</span>
+                    </div>
+                    <div class="inner">
+                        <div class="user_card">
+                            <div>
+                                <a class="user_avatar" href="/user/lychiyu">
+                                    <img src="{{ user.image }}"
+                                         title="{{ user.nick_name }}">
+                                </a>
+                                <span class="user_name"><a class="dark"
+                                                           href="{% url 'user:info' user.id %}">{{ user.nick_name }}</a></span>
+                                <div class="board clearfix">
+                                    <div class="floor">
+                                        <span class="big">积分: {{ user.score }} </span>
+                                    </div>
+                                </div>
+                                <div class="space clearfix"></div>
+                                <span class="signature">“{% if user.signature == '' %}
+                                    这家伙很懒，什么个性签名都没有留下。{% else %}{{ user.signature }}{% endif %}”</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if request.user.is_authenticated %}
+                    <div class="panel panel-default">
+                        <div class="inner">
+                            <a href="{% url 'topic:create' %}" id="create_topic_btn">
+                                <button class="btn btn-success">发布话题</button>
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if no_comment_topics %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">无人回复的话题</span>
+                        </div>
+                        <div class="inner">
+                            <ul class="unstyled">
+                                {% for no_topic in no_comment_topics %}
+                                    <li>
+                                        <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                                title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">积分榜</span>
+                        &nbsp;
+                    </div>
+                    <div class="inner">
+                        <ol>
+                            {% for top_user in top_users %}
+                                <li>
+                                    <span class="top_score">{{ top_user.score }}</span>
+                                    <span class="user_name"><a
+                                            href="{% url 'user:info' top_user.id %}">{{ top_user.nick_name }}</a></span>
+                                </li>
+                            {% endfor %}
+                        </ol>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!--<div id="backtotop" style="top: 28px; right: 0px; display: block;">回到顶部</div>-->
+    </div>
+{% endblock %}

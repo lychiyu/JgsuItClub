@@ -1,0 +1,184 @@
+.render_con {
+    font-family: PingFang SC, Hiragino Sans GB, Helvetica Neue, Microsoft Yahei, WenQuanYi Micro Hei, sans-serif;
+}
+
+.render_con image {
+
+}
+
+.render_con h1 {
+    font-size: 30px;
+    margin: 20px;
+}
+
+.render_con h2 {
+    margin: 35px 0 20px;
+    font-size: 26px;
+}
+
+.render_con h1, .render_con h2, .render_con h3 {
+    line-height: 40px;
+}
+
+.render_con h3 {
+    margin: 20px 0;
+    font-size: 21px;
+}
+
+.render_con h1, .render_con h2, .render_con h3, .render_con h4, .render_con h5, .render_con h6 {
+    font-weight: 500;
+}
+
+.render_con hr {
+    border: 0;
+    border-bottom: 1px dashed #cfcfcf;
+    margin: 30px 0;
+    display: block;
+    -webkit-margin-before: 0.5em;
+    -webkit-margin-after: 0.5em;
+    -webkit-margin-start: auto;
+    -webkit-margin-end: auto;
+}
+
+.render_con strong {
+    font-weight: 700;
+
+}
+
+.render_con blockquote {
+    padding: 10px 15px;
+    border-left-style: solid;
+    border-left-width: 10px;
+    border-color: #D6DBDF;
+    background: none repeat scroll 0 0 rgba(102, 128, 153, .05);
+    margin: 0 0 20px;
+}
+
+.render_con p {
+    margin: 0 0 20px;
+    line-height: 30px;
+    display: block;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+}
+
+.render_con blockquote p last-child {
+    margin-bottom: 0;
+
+}
+
+.render_con blockquote > p {
+    margin-bottom: 15px;
+
+}
+
+.render_con blockquote p {
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 25px;
+}
+
+.render_con a {
+    color: #08c;
+    text-decoration: none;
+}
+
+.render_con ul, .render_con ol {
+    padding: 0;
+    margin: 0 0 10px 25px;
+    list-style: disc;
+}
+
+.render_con ul {
+    display: block;
+    list-style-type: disc;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;
+}
+
+.render_con li {
+    line-height: 27px;
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+
+.render_con img {
+    cursor: pointer;
+    height: auto;
+    max-width: 100%;
+    vertical-align: middle;
+    border: 0;
+}
+
+.render_con pre {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    border-width: 0;
+    line-height: 20px;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    border-radius: 4px;
+    background: none repeat scroll 0 0 rgba(102, 128, 153, .05);
+    margin: 0 0 20px;
+    font-size: 14px;
+    display: block;
+    background-color: rgba(102, 128, 153, 0.05);
+    padding: 20px;
+    padding-bottom: 0;
+}
+
+.render_con pre code {
+    background-color: transparent;
+
+}
+
+.render_con table {
+    display: table;
+    max-width: 100%;
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-left: 0;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+.render_con table tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+.render_con table tr th {
+    vertical-align: bottom;
+    font-weight: 700;
+    padding: 8px;
+    line-height: 20px;
+    text-align: left;
+    border-left: 1px solid #ddd;
+}
+
+.render_con tbody > tr:nth-child(2n+1) > td, .render_con tbody > tr:nth-child(2n+1) > th {
+    background-color: rgba(102, 128, 153, .05);
+
+}
+
+.render_con td {
+    padding: 8px;
+    line-height: 20px;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+}
+

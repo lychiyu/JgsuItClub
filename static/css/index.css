@@ -104,16 +104,12 @@ ol, ul {
 }
 
 .content .list-group-item .topic_title {
-    display: inline-block;
     max-width: 800px;
     color: #333;
     font-size: 18px;
     overflow: hidden;
 }
 
-.content .list-group-item .topic_title:visited {
-    color: #888;
-}
 
 .pagination {
     margin: 10px;
@@ -168,6 +164,27 @@ ol, ul {
     color: #838383;
 }
 
+.is_top {
+    background: #80bd01;
+    padding: 4px 4px;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    color: #fff;
+    font-size: 12px;
+}
+.isnot_top {
+    background: #e5e5e5;
+    padding: 4px 4px;
+    border-radius: 3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -o-border-radius: 3px;
+    color: #999;
+    font-size: 12px;
+}
+
 #comment_editor .CodeMirror {
     height: 200px;
     position: relative;
@@ -195,22 +212,55 @@ ol, ul {
     text-decoration: none;
 }
 
-.comment-list .action a{
+.comment-list .action a {
     color: #666;
     cursor: pointer;
     text-decoration: none;
     padding-left: 10px;
 }
 
-.comment-list .repl_content{
+.comment-list .repl_content {
     padding: 20px;
 }
 
-
-#user_image{
+#user_image {
     width: 100px;
     height: 100px;
 }
+
+/*个人主页的样式*/
+#userinfo {
+    padding: 14px;
+}
+
+#userinfo .avatar {
+    padding-bottom: 10px;
+}
+
+#userinfo .user_big_avatar {
+    width: 60px;
+    height: 60px;
+}
+
+#userinfo .user_big_avatar img {
+    width: 60px;
+    height: 60px;
+}
+
+#userinfo a {
+    color: #778087;
+    text-decoration: none;
+}
+
+#userinfo .avatar a {
+    padding-top: 10px;
+}
+
+#userinfo .user_profile .unstyled li {
+    padding: 4px 0;
+}
+
+/*个人主页的样式end*/
 
 /*话题详情页end*/
 
@@ -239,6 +289,7 @@ ol, ul {
     white-space: nowrap;
     text-overflow: ellipsis;
     padding: 2px 0;
+    text-align: left;
 }
 
 .sidebar .dark {
@@ -271,37 +322,41 @@ ol, ul {
     padding: 6px;
 }
 
-.sidebar .user_card .user_avatar{
+.sidebar .user_card .user_avatar {
     display: inline-block;
     width: 48px;
     height: 48px;
 }
-.sidebar .user_card .user_avatar img{
+
+.sidebar .user_card .user_avatar img {
     display: inline-block;
     width: 48px;
     height: 48px;
     vertical-align: middle;
 }
-.sidebar .user_card .board{
+
+.sidebar .user_card .board {
     padding: 10px 0;
     font-weight: 700;
 }
-.sidebar .user_card .signature{
+
+.sidebar .user_card .signature {
     font-style: italic;
-    font-size:13px;
+    font-size: 13px;
 }
 
-
-.comment-list .author_content{
+.comment-list .author_content {
     margin-bottom: 10px;
 }
-.comment-list .author_content .comment_content{
+
+.comment-list .author_content .comment_content {
     padding-left: 50px;
 }
 
-.sidebar .user_card  .user_name{
+.sidebar .user_card .user_name {
     padding-left: 10px;
 }
+
 .footer {
     background-color: #ffffff;
     height: 100px;
@@ -351,13 +406,12 @@ ol, ul {
         font-size: 14px;
     }
 
-    .panel-body {
-        padding: 0;
-    }
+
 
     .my-container {
         padding: 2px;
     }
+
 }
 
 
