@@ -361,4 +361,5 @@ class MessageView(LoginRequiredMixin, View):
     """
 
     def get(self, request):
-        return render(request, 'message.html', {})
+        data = "<a href='/'>测试模板转义</a>"
+        return render(request, 'message.html', {'data': data})

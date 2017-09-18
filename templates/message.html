@@ -10,76 +10,45 @@
                     <div class="header">
                         <ol class="breadcrumb">
                             <li><a href="{% url 'index' %}">主页</a></li>
-                            <li class="active"></li>
+                            <li class="active">新消息</li>
                         </ol>
                     </div>
-                    <div class="panel-body" id="userinfo">
-                        <div class="inner userinfo">
-                            <div class="avatar">
-                                <div class="user_big_avatar">
-                                    <img src="{{ user.image }}"
-                                         class="user_avatar" title="{{ user.nick_name }}">
-                                </div>
-                                <a class="dark nick_name">{{ user.nick_name }}</a>
-                            </div>
-                            <div class="user_profile">
-                                <ul class="unstyled">
-                                    <span class="big">{{ user.score }}</span> 积分
-                                    <li>
-                                        <a class="dark" href="{% url 'user:fav_list' user.id %}" target="_blank">
-                                            <span class="big collect-topic-count">{{ fav_nums }}</span>个话题收藏
-                                        </a>
-                                    </li>
-                                    {% if user.github %}
-                                        <li>
-                                            <span class="">Github: </span>
-                                            <a class="dark" href="{{ user.github }}" target="_blank">
-                                                {{ user.github }}https://github.com/lychiyu
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                    {% if user.weibo %}
-                                        <li>
-                                            <span>weibo</span>
-                                            <a class="dark" href="{{ user.weibo }}" target="_blank">{{ user.weibo }}</a>
-                                        </li>
-                                    {% endif %}
-                                    <li><p class="col_fade">注册时间 {{ user.date_joined }}</p></li>
-                                </ul>
-                            </div>
+                    <div class="list-group topic-list">
+                        {#                        {% for topic in topics %}#}
+                        <div class="list-group-item">
+                            <div class="cell" message_id="59b8e4b63c896622428ec6bc">
+                                <span>
+                                    <a href="/user/FateZeros" target="_blank">FateZeros</a>
+                                    回复了你的话题
+                                    <a href="{% url 'topic:detail' 1 %}#test" target="_blank">测试一下测试一下测试一下</a>
+                                </span>
+                                <a href="" title="标记已读" style="color: #80bd01;"><i class="glyphicon glyphicon-ok pull-right" style="padding: 10px"></i></a>
 
+                            </div>
                         </div>
+                        {#                        {% endfor %}#}
                     </div>
                 </div>
 
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <span class="col_fade">最近创建的话题</span>
+                        <span class="col_fade">过往消息</span>
                     </div>
                     <div class="list-group topic-list">
-                        {% for topic in topics %}
-                            <div class="list-group-item">
-                                <a class="user_avatar pull-left" href="#">
-                                    <img style="width: 40px;height: 40px;" src="{{ topic.author.image }}"
-                                         title="{{ topic.author.nick_name }}">
-                                </a>
-                                <span class="reply_count pull-left">
-                                <span class="count_of_replies" title="回复数">{{ topic.comment_nums }}</span>
-                                <span class="count_seperator">/</span>
-                                <span class="count_of_visits" title="点击数">{{ topic.click_nums }}</span>
-                            </span>
-                                <span class="publish_time pull-right">{{ topic.create_time }}</span>
-                                <div class="topic_title_wrapper">
-                                    <a class="topic_title" style="color: #08c;" href="{% url 'topic:detail' topic.id %}"
-                                       title="{{ topic.title }}">
-                                        {{ topic.title }}
-                                    </a>
-                                </div>
+                        {#                        {% for topic in topics %}#}
+                        <div class="list-group-item">
+                            <div class="cell" message_id="59b8e4b63c896622428ec6bc">
+
+		<span>
+			<a href="/user/FateZeros" target="_blank">FateZeros</a>
+			回复了你的话题
+			<a href="/topic/59b8cb072db872766ed747cd#59b8e4b63c896622428ec6bb" target="_blank">测试一下测试一下测试一下</a>
+		</span>
+
+
                             </div>
-                        {% endfor %}
-                    </div>
-                    <div class="panel-footer">
-                        <a class="dark" href="{% url 'user:topic_list' user.id %}">查看更多»</a>
+                        </div>
+                        {#                        {% endfor %}#}
                     </div>
                 </div>
             </section>
