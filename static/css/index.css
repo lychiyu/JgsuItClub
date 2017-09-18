@@ -103,11 +103,27 @@ ol, ul {
     color: #b4b4b4;
 }
 
+.content .list-group-item .topic_title_wrapper{
+
+}
+.content .list-group-item .topic_title_wrapper span{
+    /*display: inline-block;*/
+    margin-right: 10px;
+}
 .content .list-group-item .topic_title {
     max-width: 800px;
     color: #333;
     font-size: 18px;
     overflow: hidden;
+    line-height: 10px;
+}
+
+.publish_time{
+    padding-left: 30px;
+}
+
+.user_avatar{
+    text-decoration: none;
 }
 
 

@@ -131,9 +131,9 @@ USE_TZ = False
 STATIC_URL = '/static/'
 
 # 自定义静态资源路径 debug为true时有效
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
