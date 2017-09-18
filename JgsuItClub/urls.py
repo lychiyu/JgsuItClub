@@ -17,7 +17,8 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from users.views import RegisterView, LoginView, LogoutView, AciveUserView, IndexView
-from users.views import ForgetPwdView, ResetPwdView, ModifyPwdView,MessageView
+from users.views import ForgetPwdView, ResetPwdView, ModifyPwdView, MessageView, MessageReadView
+from users.views import EnrollView, EnrollDetailView, EnrollListView
 
 import xadmin
 
@@ -33,7 +34,13 @@ urlpatterns = [
     url(r'^reset/(?P<code>.*)/$', ResetPwdView.as_view(), name='user_active'),
     # 消息
     url(r'^message/$', MessageView.as_view(), name='message'),
+    url(r'^read_msg/(?P<msg_id>\d+)/$', MessageReadView.as_view(), name='read_msg'),
     url(r'^modify_pwd/$', ModifyPwdView.as_view(), name="modify_pwd"),
+    # 招新
+    url(r'^enroll/$', EnrollView.as_view(), name="enroll"),
+    # 申请详情
+    url(r'^enroll/(?P<id>\d+)/$', EnrollDetailView.as_view(), name="enroll_detail"),
+    url(r'^enroll_list/$', EnrollListView.as_view(), name="enroll_list"),
     url(r'^topic/', include('topics.urls', namespace='topic')),
     url(r'^user/', include('users.urls', namespace='user')),
 ]

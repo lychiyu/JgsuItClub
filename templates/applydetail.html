@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}
+    {{ apply_user.nick_name }} 的申请理由
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            <section class="col-md-9 .col-xs-12 content">
+                <div class="panel panel-default">
+                    <div class="header topic-detail">
+                        <span class="topic_full_title">
+                            {{ apply_user.nick_name }} 的申请理由
+                        </span>
+                        <div class="changes">
+                            <span>发布于{{ apply_msg.apply_time }}</span>
+                            <span>申请者 <a
+                                    href="{% url 'user:info' apply_user.id %}">{{ apply_user.nick_name }}</a></span>
+                            <span> 来自 {{ apply_msg.class_name }} </span>
+                            <span class="pull-right"
+                                  style="color: #4cae4c "> 状态 --- <strong>{{ status }}</strong>  </span>
+                        </div>
+                    </div>
+                    <div class="panel-body html_content render_con">{{ apply_msg.reason }}</div>
+                    <div style="display: none">
+                        <textarea id="editor" class="editor" name="t_content" rows="20"
+                                  placeholder="文章支持 Markdown 语法, 请注意标记代码" style="display: none"></textarea>
+                    </div>
+
+                </div>
+
+            </section>
+            <section class="col-md-3 .col-xs-0 sidebar">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">申请者</span>
+                    </div>
+                    <div class="inner">
+                        <div class="user_card">
+                            <div>
+                                <a class="user_avatar" href="{% url 'user:info' topic.author.id
+                                 %}">
+                                    <img src="{{ apply_user.image }}"
+                                         title="{{ apply_user.nick_name }}">
+                                </a>
+                                <span class="user_name"><a class="dark"
+                                                           href="{% url 'user:info' apply_user.id %}">{{ apply_user.nick_name }}</a></span>
+                                <div class="board clearfix">
+                                    <div class="floor">
+                                        <span class="big">积分: {{ apply_user.score }} </span>
+                                    </div>
+                                </div>
+                                <div class="space clearfix"></div>
+                                <span class="signature">“{% if apply_user.signature == '' %}
+                                    这家伙很懒，什么个性签名都没有留下。{% else %}{{ apply_user.signature }}{% endif %}”</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="inner">
+                        <a href="{% url 'topic:create' %}" id="create_topic_btn">
+                            <button class="btn btn-success">发布话题</button>
+                        </a>
+                    </div>
+                </div>
+                {% if no_comment_topics %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">无人回复的话题</span>
+                        </div>
+                        <div class="inner">
+                            <ul class="unstyled">
+
+                                {% for no_topic in no_comment_topics %}
+                                    <li>
+                                        <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                                title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+        <!--<div id="backtotop" style="top: 28px; right: 0px; display: block;">回到顶部</div>-->
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script>
+        $(function () {
+            // 渲染md文本的编辑器状态隐藏
+            var simplemde = new SimpleMDE({element: $("#editor")[0], autofocus: true});
+            md_content = $('.html_content').text();
+            htmlText = simplemde.markdown(md_content);
+            $('.html_content').html(htmlText);
+
+        })
+    </script>
+{% endblock %}

@@ -154,7 +154,7 @@ AUTHENTICATION_BACKENDS = (
 EMAIL_HOST = 'smtp.qq.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'jgsuitclub@qq.com'
-EMAIL_HOST_PASSWORD = 'xxxx'
+EMAIL_HOST_PASSWORD = 'tqimicddsndhcjch'
 EMAIL_USE_TLS = True
 EMAIL_FROM = 'jgsuitclub@qq.com'
 

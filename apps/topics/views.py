@@ -8,8 +8,10 @@ from django.core.urlresolvers import reverse
 from django.core.serializers import serialize
 
 from .models import Category, Topic
-from operation.models import UserFavorite, UserComment
+from operation.models import UserFavorite, UserComment, UserMessage
 from utils.mixin_util import LoginRequiredMixin
+
+from config import DOMAIN_PREFIX
 
 
 class TopicCreateView(LoginRequiredMixin, View):
@@ -193,11 +195,6 @@ class TopicTopView(LoginRequiredMixin, View):
 
 class AddCommentView(LoginRequiredMixin, View):
     def post(self, request):
-        # 获取主机信息用于发送激活链接
-        host = request.get_host()
-        scheme = str(request.scheme)
-        hosts = scheme + '://' + str(host)
-
         # 获取评论对象id,评论类型,评论内容
         topic_id = request.POST.get('topic_id')
         entity_id = request.POST.get('entity_id')
@@ -216,7 +213,18 @@ class AddCommentView(LoginRequiredMixin, View):
             comment_entity.comments = comments
             comment_entity.save()
 
-        # 评论用户的评论
+            # 回复话题需要发生消息
+            message = UserMessage()
+            message.from_id = request.user.id
+            message.to_id = comment_topic.author.id
+            # 消息内容
+            contents = '''<a href="/user/info/{0}" target="_blank">{1}</a>  回复了你的话题  <a href="/topic/detail/{2}#{3}" target="_blank">{4}</a>'''.format(
+                request.user.id, request.user.nick_name, topic_id, comment_entity.id, comment_topic.title)
+
+            message.message = contents
+            message.save()
+
+            # 评论用户的评论
         if entity_type == '2':
             # 获取评论用户评论 的那条评论
             to_comment = UserComment.objects.get(id=entity_id)
@@ -224,9 +232,20 @@ class AddCommentView(LoginRequiredMixin, View):
             to_user = to_comment.user
             # 拼接评论内容
             comments = '''[@{0}]({1}/user/info/{2})
-{3}'''.format(to_user.nick_name, hosts, to_user.id, comments)
+{3}'''.format(to_user.nick_name, DOMAIN_PREFIX, to_user.id, comments)
             comment_entity.comments = comments
             comment_entity.save()
+
+            # 回复评论需要发送消息
+            message = UserMessage()
+            message.from_id = request.user.id
+            message.to_id = to_user.id
+            # 消息内容
+            contents = '''<a href="/user/info/{0}" target="_blank">{1}</a>  回复了你的评论  <a href="/topic/detail/{2}#{3}" target="_blank">{4}</a>'''.format(
+                request.user.id, request.user.nick_name, topic_id, comment_entity.id, comment_topic.title)
+
+            message.message = contents
+            message.save()
 
         # 回复数需要加1
         comment_topic.comment_nums += 1

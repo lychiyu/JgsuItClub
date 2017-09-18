@@ -22,5 +22,5 @@ urlpatterns = [
     # 添加评论or回复
     url(r'^add_comment/$', AddCommentView.as_view(), name="add_comment"),
     # 屏蔽评论or回复
-    url(r'^remove_comment/(?P<comm_id>\d)/$', RemoveCommentView.as_view(), name="remove_comment"),
+    url(r'^remove_comment/(?P<comm_id>\d+)/$', RemoveCommentView.as_view(), name="remove_comment"),
 ]

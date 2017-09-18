@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from users.models import EmailVerifyRecode
 from JgsuItClub.settings import EMAIL_FROM
 
+
 # 生成随机字符串
 def random_str(randomlength=8):
     str = ''

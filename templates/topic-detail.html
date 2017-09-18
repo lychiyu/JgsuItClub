@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block title %}
-
+    {{ topic.title }}
 {% endblock %}
 
 {% block css %}
@@ -58,7 +58,9 @@
                     <div class="panel-body">
                         {% for comment in all_comments %}
                             <div class="author_content">
-                                <a href="" class="user_avatar">
+                                <!--锚点-->
+                                <a name="{{ comment.id }}"></a>
+                                <a href="{% url 'user:info' comment.user.id %}" class="user_avatar">
                                     <img src="{{ comment.user.image }}" alt="{{ comment.user.nick_name }}">
                                 </a>
                                 <div class="user_info">
@@ -67,7 +69,7 @@
                                 </div>
                                 <div class="action pull-right">
                                     {% if request.user.is_superuser %}
-                                        <!-- 屏蔽 -->
+                                        <!-- 屏蔽回复 -->
                                         <a href="{% url 'topic:remove_comment' comment.id %}"><i
                                                 class="glyphicon glyphicon-trash"></i></a>
                                     {% endif %}
@@ -79,8 +81,6 @@
                                                 style="margin-right: 5px"></i></a>
                                     {% endif %}
                                 </div>
-                                <!--锚点-->
-                                <a name="{{ comment.id }}"></a>
                                 <div class="comment_content render_con">{{ comment.comments }}</div>
                                 <div class="panel panel-default other_editor_{{ comment.id }}" style="display: none">
                                     <div class="panel-heading">
@@ -236,7 +236,7 @@
                 $.ajax({
                     cache: false,
                     type: "POST",
-                    url: "/topic/delete/" + "{{ topic.id }}",
+                    url: "{% url 'topic:delete' topic.id %}",
                     async: true,
                     beforeSend: function (xhr, settings) {
                         xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");

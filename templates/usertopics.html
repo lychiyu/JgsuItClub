@@ -30,6 +30,11 @@
                                 <div class="topic_title_wrapper">
                                     <a class="topic_title" style="color: #08c;" href="{% url 'topic:detail' topic.id %}"
                                        title="{{ topic.title }}">
+                                        {% if topic.is_top %}
+                                            <span class="put_top is_top">置顶</span>
+                                        {% else %}
+                                            <span class="put_top isnot_top">{{ topic.category.name }}</span>
+                                        {% endif %}
                                         {{ topic.title }}
                                     </a>
                                 </div>
@@ -89,7 +94,7 @@
                         <div class="inner">
                             <div class="user_card">
                                 <div>
-                                    <a class="user_avatar" href="/user/lychiyu">
+                                    <a class="user_avatar" href="{% url 'user:info' user.id %}">
                                         <img src="{{ user.image }}"
                                              title="{{ user.nick_name }}">
                                     </a>
@@ -115,25 +120,25 @@
                         </div>
                     </div>
                 {% endif %}
-            {% if no_comment_topics %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="col_fade">无人回复的话题</span>
-                    </div>
-                    <div class="inner">
-                        <ul class="unstyled">
-                            {% for no_topic in no_comment_topics %}
-                                <li>
-                                    <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
-                                            title="{{ no_topic.title }}">{{ no_topic.title }}</a>
-                                    </div>
-                                </li>
-                            {% endfor %}
+                {% if no_comment_topics %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">无人回复的话题</span>
+                        </div>
+                        <div class="inner">
+                            <ul class="unstyled">
+                                {% for no_topic in no_comment_topics %}
+                                    <li>
+                                        <div><a class="dark topic_title" href="{% url 'topic:detail' no_topic.id %}"
+                                                title="{{ no_topic.title }}">{{ no_topic.title }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
 
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-{% endif %}
+                {% endif %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <span class="col_fade">积分榜</span>

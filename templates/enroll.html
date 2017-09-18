@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}
+    招新
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <link rel="stylesheet" href="{% static 'css/detail.css' %}">
+{% endblock %}
+
+
+{% block main %}
+    <div class="container my-container">
+        <div class="row main">
+            <section class="col-md-9 .col-xs-12 content">
+                <div class="panel panel-default">
+                    <div class="header">
+                        <ol class="breadcrumb">
+                            <li><a href="{% url 'index' %}">首页</a></li>
+                            <li class="active">招新</li>
+                            <li class="pull-right"><a href="{% url 'enroll_list' %}">招新列表</a></li>
+                        </ol>
+
+                    </div>
+                    <div class="panel-body">
+                        <form class="form-horizontal">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label for="name" class="col-sm-2 control-label">姓名：</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="name" name="name"
+                                               placeholder="输入你的真实姓名">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="class_name" class="col-sm-2 control-label">班级：</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="class_name" name="class_name"
+                                               placeholder="如: 计算机17本1班">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="qq" class="col-sm-2 control-label">QQ：</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="qq" name="qq"
+                                               placeholder="输入的QQ号码">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone" class="col-sm-2 control-label">手机号码：</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="phone" name="phone"
+                                               placeholder="输入你的手机号码">
+                                    </div>
+                                </div>
+                                <p style="font-weight: 700">申请理由: </p>
+                                <div class="markdown_editor in_editor">
+                                    <div class="markdown_in_editor">
+                                    <textarea id="editor" class="editor" name="t_content" rows="20"
+                                              placeholder="文章支持 Markdown 语法, 请注意标记代码" style="display: none"></textarea>
+                                        <div class="form-group">
+                                            <div class="col-sm-10">
+                                                <button type="button" id="reason_btn" class="btn btn-primary">提交
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <input type="hidden" id="topic_tags" name="topic_tags" value="">
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </section>
+            <section class="col-md-3 .col-xs-0 sidebar">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">Markdown 语法参考</span>
+                    </div>
+                    <div class="inner">
+                        <ol>
+                            <li><tt>### 单行的标题</tt></li>
+                            <li><tt>**粗体**</tt></li>
+                            <li><tt>`console.log('行内代码')`</tt></li>
+                            <li><tt>```js\n code \n```</tt> 标记代码块</li>
+                            <li><tt>[内容](链接)</tt></li>
+                            <li><tt>![文字说明](图片链接)</tt></li>
+                        </ol>
+                        <span><a href="http://www.appinn.com/markdown/" target="_blank">Markdown 文档</a></span>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <span class="col_fade">招新报名表填写指南</span>
+                    </div>
+                    <div class="inner">
+                        <ol>
+                            <li>仔细认真的填写姓名与班级信息</li>
+                            <li>在编辑器中陈述您的申请理由</li>
+                            <li>申请理由需要有以下几点：</li>
+                            <li>## 自我介绍</li>
+                            <li>## 个人优势</li>
+                            <li>## 对IT行业的看法</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script>
+        $(function () {
+            // 初始化编辑器
+            var simplemde = new SimpleMDE({element: $("#editor")[0]});
+
+            // 自定义上传图片
+            $('.fa-picture-o').on('click', function () {
+                // alert($('.cm-string:last').html('https://test'))
+            });
+            // 提交
+            $('#reason_btn').on('click', function () {
+                name = $('#name').val();
+                if (name === '') {
+                    alert('请输入你的姓名');
+                    return
+                }
+                class_name = $('#class_name').val();
+                if (class_name === '') {
+                    alert('请输入你所在班级');
+                    return
+                }
+                qq = $('#qq').val();
+                if (qq === '') {
+                    alert('请输入你的qq');
+                    return
+                }
+                phone = $('#phone').val();
+                if (phone === '') {
+                    alert('请输入你的手机号码');
+                    return
+                }
+                reason = simplemde.value();
+                if (reason === '') {
+                    alert('请认真填写申请理由');
+                    return
+                }
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'enroll' %}",
+                    data: {
+                        'email': "{{ user.email }}", 'name': name, 'class_name': class_name
+                        , 'qq': qq, 'phone': phone, 'reason': reason
+                    },
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == '1') {
+                            alert(data.msg)
+                        }
+                        else if (data.status == '0') {
+                            alert(data.msg);
+                            var id = parseInt(data.id);
+                            window.location.href = "/enroll/" + id;
+                        }
+                    },
+                });
+            })
+        })
+    </script>
+{% endblock %}

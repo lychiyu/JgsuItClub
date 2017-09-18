@@ -16,7 +16,7 @@
                            class="topic-tab {% if cate_id == '2' %}current-tab{% endif %}">问答</a>
                         <a href="{% url 'index' %}?cate=3"
                            class="topic-tab {% if cate_id == '3' %}current-tab{% endif %}">测试</a>
-                        <a href="" class="topic-tab">招新</a>
+                        <a href="{% url 'enroll' %}" class="topic-tab">招新</a>
                     </div>
                     <div class="list-group topic-list">
                         {% if topics %}

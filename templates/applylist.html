@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-    我的消息
+    申请列表
 {% endblock %}
 {% block main %}
     <div class="container my-container">
@@ -10,47 +10,27 @@
                     <div class="header">
                         <ol class="breadcrumb">
                             <li><a href="{% url 'index' %}">主页</a></li>
-                            <li class="active">新消息</li>
+                            <li class="active"> 申请列表</li>
                         </ol>
                     </div>
                     <div class="list-group topic-list">
-                        {% if unread_msgs %}
-                            {% for unread_msg in unread_msgs %}
-                                <div class="list-group-item">
-                                    <div class="cell" message_id="59b8e4b63c896622428ec6bc">
-                                <span>
-                                    {{ unread_msg.message|safe }}
-                                </span>
-                                        <a href="{% url 'read_msg' unread_msg.id %}" title="标记已读" style="color: #80bd01;"><i
-                                                class="glyphicon glyphicon-ok pull-right" style="padding: 10px"></i></a>
-
-                                    </div>
+                        {% for apply in apply_list %}
+                            <div class="list-group-item">
+                                <a class="user_avatar pull-left" href="{% url 'user:info' apply.get_apply_user.id %}">
+                                    <img style="width: 40px;height: 40px;" src="{{ apply.get_apply_user.image }}"
+                                         title="{{ apply.get_apply_user.nick_name }}">
+                                </a>
+                                <span class="reply_count pull-left">
+                            </span>
+                                <span class="publish_time pull-right">{{ apply.apply_time }}</span>
+                                <div class="topic_title_wrapper">
+                                    <a class="topic_title" style="color: #08c;" href="/enroll/{{apply.id}}/"
+                                       title="{{ apply.get_apply_user.nick_name }}的申请">
+                                        {{ apply.get_apply_user.nick_name }}的申请
+                                    </a>
                                 </div>
-                            {% endfor %}
-                        {% else %}
-                            <p style="padding: 10px">暂无消息</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="col_fade">过往消息</span>
-                    </div>
-                    <div class="list-group topic-list">
-                        {% if readed_msgs %}
-                            {% for readed_msg in readed_msgs %}
-                                <div class="list-group-item">
-                                    <div class="cell" message_id="59b8e4b63c896622428ec6bc">
-                                    <span>
-                                        {{ readed_msg.message|safe }}
-                                    </span>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p style="padding: 10px">暂无消息</p>
-                        {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
             </section>
@@ -68,32 +48,32 @@
                         </div>
                     </div>
                 {% endif %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <span class="col_fade">个人信息</span>
-                    </div>
-                    <div class="inner">
-                        <div class="user_card">
-                            <div>
-                                <a class="user_avatar" href="{% url 'user:info' user.id %}">
-                                    <img src="{{ user.image }}"
-                                         title="{{ user.nick_name }}">
-                                </a>
-                                <span class="user_name"><a class="dark"
-                                                           href="{% url 'user:info' user.id %}">{{ user.nick_name }}</a></span>
-                                <div class="board clearfix">
-                                    <div class="floor">
-                                        <span class="big">积分: {{ user.score }} </span>
+                {% if request.user.is_authenticated %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="col_fade">个人信息</span>
+                        </div>
+                        <div class="inner">
+                            <div class="user_card">
+                                <div>
+                                    <a class="user_avatar" href="{% url 'user:info' user.id %}">
+                                        <img src="{{ user.image }}"
+                                             title="{{ user.nick_name }}">
+                                    </a>
+                                    <span class="user_name"><a class="dark"
+                                                               href="{% url 'user:info' user.id %}">{{ user.nick_name }}</a></span>
+                                    <div class="board clearfix">
+                                        <div class="floor">
+                                            <span class="big">积分: {{ user.score }} </span>
+                                        </div>
                                     </div>
+                                    <div class="space clearfix"></div>
+                                    <span class="signature">“{% if user.signature == '' %}
+                                        这家伙很懒，什么个性签名都没有留下。{% else %}{{ user.signature }}{% endif %}”</span>
                                 </div>
-                                <div class="space clearfix"></div>
-                                <span class="signature">“{% if user.signature == '' %}
-                                    这家伙很懒，什么个性签名都没有留下。{% else %}{{ user.signature }}{% endif %}”</span>
                             </div>
                         </div>
                     </div>
-                </div>
-                {% if request.user.is_authenticated %}
                     <div class="panel panel-default">
                         <div class="inner">
                             <a href="{% url 'topic:create' %}" id="create_topic_btn">

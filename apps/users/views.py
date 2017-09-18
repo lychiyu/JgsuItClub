@@ -15,15 +15,17 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from JgsuItClub.settings import MEDIA_ROOT
 
+from config import DOMAIN_PREFIX
+
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
 
-from users.models import UserProfile, EmailVerifyRecode
+from users.models import UserProfile, EmailVerifyRecode, UserEnroll
 from users.forms import RegisterForm, LoginForm, ForgetPwdForm, ModifyPwdForm
 from utils.email_send import send_email
 from topics.models import Topic, Category
 from utils.mixin_util import LoginRequiredMixin
 from utils.qiniusdk import qiniu_upload_file
-from operation.models import UserFavorite
+from operation.models import UserFavorite, UserMessage
 
 
 # 自定义用户登录的逻辑
@@ -44,9 +46,6 @@ class RegisterView(View):
 
     def post(self, request):
         # 获取主机信息用于发送激活链接
-        host = request.get_host()
-        scheme = str(request.scheme)
-        hosts = scheme + '://' + str(host)
         register_form = RegisterForm(request.POST)
         if register_form.is_valid():
             email = request.POST.get('email', '')
@@ -61,7 +60,7 @@ class RegisterView(View):
             user_profile.password = make_password(password)
             user_profile.is_active = False
             user_profile.save()
-            send_email(email, hosts)
+            send_email(email, DOMAIN_PREFIX)
             return HttpResponse('{"status":"0","msg":"欢迎您的注册，请您去邮箱中激活您的账号"}', content_type='application/json')
         else:
             return HttpResponse(json.dumps(register_form.errors), content_type='application/json')
@@ -123,6 +122,9 @@ class AciveUserView(View):
 
 class IndexView(View):
     def get(self, request):
+        # 获取keywords
+        keywords = request.GET.get('keywords', '')
+
         # 获取cate参数
         cate_id = request.GET.get('cate', '0')
         if cate_id == 0:
@@ -137,18 +139,23 @@ class IndexView(View):
                 cate_id = '0'
                 topics = Topic.objects.filter(is_show=True, category__in=(1, 2))
 
+        if keywords:
+            topics = topics.filter(Q(title__icontains=keywords) | Q(content__icontains=keywords))
+
         # 分页
         try:
             page = request.GET.get('page', 1)
         except PageNotAnInteger:
             page = 1
-        p = Paginator(topics, 3, request=request)
+        p = Paginator(topics, 12, request=request)
         page_topics = p.page(page)
 
         # 获取所有话题分类
         cates = Category.objects.all()
         # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
+                                                                                                             '-create_time')[
+                            :10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
         return render(request, 'index.html', {
@@ -201,13 +208,10 @@ class ForgetPwdView(View):
         return render(request, 'forget.html', {'forget_form': forget_form})
 
     def post(self, request):
-        host = request.get_host()
-        scheme = str(request.scheme)
-        hosts = scheme + '://' + str(host)
         forget_form = ForgetPwdForm(request.POST)
         if forget_form.is_valid():
             email = request.POST.get('email', '')
-            send_email(email, hosts, 'forget')
+            send_email(email, DOMAIN_PREFIX, 'forget')
             return render(request, 'skip.html', {'msg': '重置密码链接已经发送至您的邮箱，请查收！'})
         else:
             return render(request, 'forget.html', {"forget_form": forget_form, 'msg': '输入不合法'})
@@ -300,7 +304,7 @@ class UserTopicsView(View):
 
     def get(self, request, user_id):
         user = UserProfile.objects.get(id=user_id)
-        topics = Topic.objects.filter(author=user).order_by('-create_time')
+        topics = Topic.objects.filter(author=user).order_by('-is_top', '-create_time')
         # 分页
         try:
             page = request.GET.get('page', 1)
@@ -310,7 +314,9 @@ class UserTopicsView(View):
         page_topics = p.page(page)
 
         # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
+                                                                                                             '-create_time')[
+                            :10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
         return render(request, 'usertopics.html', {
@@ -344,7 +350,9 @@ class UserFavTopicsView(View):
         page_topics = p.page(page)
 
         # 无人回复的话题
-        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2))[:10]
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
+                                                                                                             '-create_time')[
+                            :10]
         # 积分榜
         top_users = UserProfile.objects.all().order_by('-score')[:15]
         return render(request, 'userfavtopics.html', {
@@ -361,5 +369,102 @@ class MessageView(LoginRequiredMixin, View):
     """
 
     def get(self, request):
-        data = "<a href='/'>测试模板转义</a>"
-        return render(request, 'message.html', {'data': data})
+        # 未读消息
+        unread_msgs = UserMessage.objects.filter(to_id=request.user.id, has_read=False).order_by('-send_time')[:15]
+
+        # 过往消息
+        readed_msgs = UserMessage.objects.filter(to_id=request.user.id, has_read=True).order_by('-send_time')[:15]
+
+        # 积分榜
+        top_users = UserProfile.objects.all().order_by('-score')[:15]
+        return render(request, 'message.html', {
+            'user': request.user,
+            'unread_msgs': unread_msgs,
+            'readed_msgs': readed_msgs,
+            'top_users': top_users,
+        })
+
+
+class MessageReadView(LoginRequiredMixin, View):
+    def get(self, request, msg_id):
+        msg = UserMessage.objects.get(to_id=request.user.id, id=msg_id)
+        msg.has_read = True
+        msg.save()
+        return HttpResponseRedirect(reverse('message'))
+
+
+class EnrollView(LoginRequiredMixin, View):
+    """
+    招新
+    """
+
+    def get(self, request):
+        return render(request, 'enroll.html', {'user': request.user})
+
+    def post(self, request):
+        email = request.POST.get('email')
+        name = request.POST.get('name')
+        class_name = request.POST.get('class_name')
+        qq = request.POST.get('qq')
+        phone = request.POST.get('phone')
+        reason = request.POST.get('reason')
+
+        if UserEnroll.objects.filter(email=email):
+            return HttpResponse('{"status":"1","msg":"你已经申请过了"}', content_type='application/json')
+
+        user_enrllo = UserEnroll()
+        user_enrllo.email = email
+        user_enrllo.name = name
+        user_enrllo.class_name = class_name
+        user_enrllo.qq = qq
+        user_enrllo.phone = phone
+        user_enrllo.reason = reason
+        user_enrllo.save()
+        if user_enrllo.id:
+            id = user_enrllo.id
+            data = {"status": "0", "msg": "申请成功", "id": id}
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        else:
+            return HttpResponse('{"status":"1","msg":"申请失败"}', content_type='application/json')
+
+
+class EnrollDetailView(View):
+    def get(self, request, id):
+        # 获取该用户的申请信息
+        apply_msg = UserEnroll.objects.get(id=id)
+        status = "未处理"
+        if apply_msg.status == 1:
+            status = '未通过'
+        elif apply_msg.status == 2:
+            status = "已通过"
+
+        apply_user = UserProfile.objects.get(email=apply_msg.email)
+        # 无人回复的话题
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
+                                                                                                             '-create_time')[
+                            :10]
+        return render(request, 'applydetail.html', {
+            'apply_msg': apply_msg,
+            'apply_user': apply_user,
+            'no_comment_topics': no_comment_topics,
+            'status': status,
+        })
+
+
+class EnrollListView(LoginRequiredMixin, View):
+    def get(self, request):
+        # 获取所有的申请信息
+        apply_list = UserEnroll.objects.all()
+
+        # 无人回复的话题
+        no_comment_topics = Topic.objects.filter(comment_nums=0, is_show=True, category__in=(1, 2)).order_by('-is_top',
+                                                                                                             '-create_time')[
+                            :10]
+        # 积分榜
+        top_users = UserProfile.objects.all().order_by('-score')[:15]
+        return render(request, 'applylist.html', {
+            'user': request.user,
+            'apply_list': apply_list,
+            'no_comment_topics': no_comment_topics,
+            'top_users': top_users,
+        })
