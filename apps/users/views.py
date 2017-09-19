@@ -197,6 +197,10 @@ class UserSettingView(LoginRequiredMixin, View):
 
 
 class UserResetPwdView(LoginRequiredMixin, View):
+    """
+    登录用户修改密码
+    """
+
     def post(self, request):
         password = request.POST.get('password')
         new_password = request.POST.get('new_password')
@@ -212,6 +216,10 @@ class UserResetPwdView(LoginRequiredMixin, View):
 
 
 class ForgetPwdView(View):
+    """
+    忘记密码
+    """
+
     def get(self, request):
         forget_form = ForgetPwdForm()
         return render(request, 'forget.html', {'forget_form': forget_form})
@@ -227,6 +235,10 @@ class ForgetPwdView(View):
 
 
 class ResetPwdView(View):
+    """
+    重置密码页面
+    """
+
     def get(self, request, code):
         all_recodes = EmailVerifyRecode.objects.filter(code=code)
         if all_recodes:
@@ -253,12 +265,13 @@ class ModifyPwdView(View):
                 user = UserProfile.objects.get(email=email)
                 user.password = make_password(new_password)
                 user.save()
-                return render(request, 'login.html')
+                return HttpResponse('{"status":"0","msg":"修改密码成功"}', content_type='application/json')
             else:
-                return render(request, 'resetpwd.html', {'msg': '两次输入的密码不同'})
+                return HttpResponse('{"status":"1","msg":"两次输入的密码不同"}', content_type='application/json')
         else:
             email = request.POST.get("email", "")
-            return render(request, 'resetpwd.html', {'modifypwd_view': modifypwd_form.errors, 'email': email})
+            data = {"status": "2", "msg": email}
+            return HttpResponse(json.dumps(data), content_type='application/json')
 
 
 class UploadImage(LoginRequiredMixin, View):
