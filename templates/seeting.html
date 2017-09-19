@@ -36,7 +36,7 @@
                                 <div class="form-group">
                                     <label for="nick_name" class="col-sm-2 control-label">用户名</label>
                                     <div class="col-sm-5">
-                                        <input readonly type="text" class="form-control" id="nick_name" name="nick_name"
+                                        <input type="text" class="form-control" id="nick_name" name="nick_name"
                                                value="{{ userprofile.nick_name }}">
                                     </div>
                                 </div>
@@ -153,6 +153,7 @@
     <script>
         $(function () {
             $('#setting_btn').on('click', function () {
+                var nick_name = $('#nick_name').val();
                 var weibo = $('#weibo').val();
                 var github = $('#github').val();
                 var signature = $('#signature').val();
@@ -160,7 +161,7 @@
                     cache: false,
                     type: "POST",
                     url: "{% url 'user:setting' %}",
-                    data: {"weibo": weibo, "github": github, "signature": signature},
+                    data: {"nick_name": nick_name, "weibo": weibo, "github": github, "signature": signature},
                     async: true,
                     beforeSend: function (xhr, settings) {
                         {# 提交csrf #}

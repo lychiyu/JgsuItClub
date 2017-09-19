@@ -184,9 +184,11 @@ class UserSettingView(LoginRequiredMixin, View):
         :param request:
         :return:
         """
+        nick_name = request.POST.get('nick_name', str(uuid.uuid1())[:8])
         weibo = request.POST.get('weibo', '')
         github = request.POST.get('github', '')
         signature = request.POST.get('signature', '')
+        request.user.nick_name = nick_name
         request.user.weibo = weibo
         request.user.github = github
         request.user.signature = signature

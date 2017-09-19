@@ -410,7 +410,7 @@
                     // 回复
                     $('#btn_comment_' + id).on('click', function () {
                         comments = other_simplemde.value();
-                        add_comment({{ topic.id }}, 2, comments)
+                        add_comment(id, 2, comments)
                     })
                 })
             })
